@@ -10,7 +10,6 @@ import 'commingle_pie_chart_controller.dart';
 import 'commingle_pie_slice.dart';
 
 const awesomePieChartDefaultBadgeDiameter = 28.0;
-const awesomePieChartDefaultRingThickness = 56.0;
 
 const _rootStartOffset = -90.0;
 
@@ -63,7 +62,7 @@ final class ComminglePieChart extends StatefulWidget {
       curve: Curves.easeOutCubic,
     ),
     this.badgeDiameter = awesomePieChartDefaultBadgeDiameter,
-    this.ringThickness = awesomePieChartDefaultRingThickness,
+    this.ringThickness = 56.0,
     this.pressedGrowth = 8.0,
     this.pressGrowthAnimation,
     this.fullIconSweep,
@@ -876,7 +875,7 @@ final class _RestingPie extends StatelessWidget {
 double awesomePieChartFullIconSweep({
   double size = 320,
   double badgeDiameter = awesomePieChartDefaultBadgeDiameter,
-  double ringThickness = awesomePieChartDefaultRingThickness,
+  double ringThickness = 56.0,
 }) {
   final midRadius = size / 2 - ringThickness / 2;
   return 2 * math.asin((badgeDiameter / 2) / midRadius);
@@ -886,7 +885,7 @@ double awesomePieChartFullIconSweep({
 double awesomePieChartMinIconSweep({
   double size = 320,
   double badgeDiameter = awesomePieChartDefaultBadgeDiameter,
-  double ringThickness = awesomePieChartDefaultRingThickness,
+  double ringThickness = 56.0,
 }) =>
     awesomePieChartFullIconSweep(
       size: size,

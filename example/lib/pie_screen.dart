@@ -51,6 +51,7 @@ class _PieScreenState extends State<PieScreen> {
                         duration: Duration(milliseconds: 450),
                         curve: Curves.easeInOut,
                       ),
+                      ringThickness: 48.0,
                       fullIconSweep: 0.4,
                       minIconSweep: 0.2,
                       pressedGrowth: 8.0,
