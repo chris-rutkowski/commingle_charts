@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  unit-tests:
+  all-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,26 +29,6 @@ jobs:
 
       - name: Flutter unit tests
         run: flutter test --reporter=failures-only
-
-  dart-analyze:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
-      - name: Read Flutter version
-        id: flutter_version
-        run: echo "version=$(cat flutter-version.txt)" >> $GITHUB_OUTPUT
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          cache: true
-          flutter-version: ${{ steps.flutter_version.outputs.version }}
-
-      - name: Package pub get
-        run: flutter pub get
 
       - name: Analyze package
         run: dart analyze --fatal-infos lib test
