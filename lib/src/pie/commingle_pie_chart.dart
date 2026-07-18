@@ -204,6 +204,89 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
     if (oldWidget.animation.duration != widget.animation.duration) {
       _expansion.duration = widget.animation.duration;
     }
+    if (!identical(oldWidget.slices, widget.slices)) {
+      _reconcile(oldWidget.slices);
+    }
+  }
+
+  /// Reconciles the drill state against new data after [widget.slices] changes.
+  ///
+  /// Case A (top view): nothing to preserve; a rebuild picks up the new data.
+  /// Case B (drilled in): if the drilled chain still exists in the new data
+  /// (matched by [ComminglePieSlice.key]) the user stays at the same node with
+  /// remapped indices; otherwise they are reset to the root.
+  void _reconcile(List<ComminglePieSlice> oldSlices) {
+    // Commit any in-flight transition so _path / _drillIndex are consistent.
+    if (_isBusy) _settle();
+
+    if (_path.isEmpty) {
+      // Case A: nothing to remap; build() reads widget.slices directly.
+      setState(() {});
+      return;
+    }
+
+    final keyChain = _keyChainForPath(oldSlices, _path);
+    final remapped = keyChain == null ? null : _remapPathByKeys(keyChain, widget.slices);
+
+    if (remapped == null) {
+      // Case B (broken): kick the user back to the top.
+      _reset();
+      return;
+    }
+
+    // Case B (valid): snap to the new data at the same node.
+    setState(() {
+      _path
+        ..clear()
+        ..addAll(remapped);
+      _rebuildOffsetStack();
+    });
+    _syncControllerPath();
+  }
+
+  /// Keys of the slices [path] points at in [tree], or null if [path] no longer
+  /// resolves (e.g. old data shape).
+  List<Object>? _keyChainForPath(List<ComminglePieSlice> tree, List<int> path) {
+    final keys = <Object>[];
+    var slices = tree;
+    for (final index in path) {
+      if (index < 0 || index >= slices.length) return null;
+      final slice = slices[index];
+      keys.add(slice.key);
+      slices = slice.slices;
+    }
+    return keys;
+  }
+
+  /// Maps [keyChain] onto [tree], returning the index path or null if any level
+  /// no longer contains the expected key.
+  List<int>? _remapPathByKeys(List<Object> keyChain, List<ComminglePieSlice> tree) {
+    final indices = <int>[];
+    var slices = tree;
+    for (final key in keyChain) {
+      final index = slices.indexWhere((slice) => slice.key == key);
+      if (index < 0) return null;
+      indices.add(index);
+      slices = slices[index].slices;
+    }
+    return indices;
+  }
+
+  /// Recomputes [_offsetStack] for the current [_path] using the new values,
+  /// replaying the same drill-in geometry as [_onExpansionStatus].
+  void _rebuildOffsetStack() {
+    _offsetStack
+      ..clear()
+      ..add(_rootStartOffset);
+    var slices = widget.slices;
+    for (final index in _path) {
+      if (index < 0 || index >= slices.length) break;
+      final t = widget.animation.curve.transform(1);
+      final values = _expandedParentValues(slices, index, t);
+      final midpoint = _restingMidpoint(slices, index, startOffset: _offsetStack.last);
+      _offsetStack.add(_offsetKeepingMidpoint(values, index, midpoint));
+      slices = slices[index].slices;
+    }
   }
 
   @override

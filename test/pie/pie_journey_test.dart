@@ -297,6 +297,7 @@ ComminglePieSlice _section({
   List<ComminglePieSlice> slices = const [],
 }) {
   return ComminglePieSlice(
+    key: title,
     value: value,
     color: color,
     slices: slices,

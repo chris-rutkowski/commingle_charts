@@ -41,6 +41,7 @@ List<ComminglePieSlice> buildPieSlices(List<FinancialFragment> fragments) {
   return [
     for (final fragment in sorted)
       ComminglePieSlice(
+        key: fragment.id,
         value: total == BigDecimal.zero
             ? 0
             : fragment.value.divide(total, roundingMode: RoundingMode.HALF_UP, scale: 12).toDouble(),
