@@ -728,6 +728,12 @@ List<_RingSlice> _childOverlaySlices({
 }) {
   final selected = parentSlices[selectedIndex];
   final selectedValue = parentValues[selectedIndex];
+  // Children [value] magnitudes are arbitrary (they need not sum to 1), so
+  // normalise by the children's own total. This makes the children fill exactly
+  // the selected parent's arc and — crucially — makes each child's sweep match
+  // the resting level it becomes, so badges don't jump in size or pop in/out at
+  // the transition->settle boundary.
+  final childrenTotal = selected.childrenTotalValue;
   final slices = <_RingSlice>[];
 
   for (var i = 0; i < selectedIndex; i++) {
@@ -744,7 +750,7 @@ List<_RingSlice> _childOverlaySlices({
   }
 
   for (final child in selected.slices) {
-    final value = selectedValue * child.value;
+    final value = selectedValue * child.value / childrenTotal;
     slices.add(
       _RingSlice(
         section: child,
