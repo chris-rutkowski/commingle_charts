@@ -38,7 +38,10 @@ final class FinancialFragment {
 /// Only fragments with a positive amount are mapped; zero (or negative) amounts
 /// are omitted, since [ComminglePieSlice.value] must be `> 0`.
 List<ComminglePieSlice> buildPieSlices(List<FinancialFragment> fragments) {
-  final positive = [for (final f in fragments) if (f.value.compareTo(BigDecimal.zero) > 0) f];
+  final positive = [
+    for (final f in fragments)
+      if (f.value.compareTo(BigDecimal.zero) > 0) f,
+  ];
   final total = positive.fold(BigDecimal.zero, (sum, f) => sum + f.value);
   final sorted = [...positive]..sort((a, b) => b.value.compareTo(a.value));
 
