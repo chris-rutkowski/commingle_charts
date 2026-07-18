@@ -10,9 +10,7 @@ Config tapTestConfig({
   String? suite,
   double pixelDensity = 1,
   Size screenSize = const Size(393, 852),
-  SnapshotConfig snapshot = const SnapshotConfig(
-    path: 'goldens/[test]/[name].png'
-  ),
+  SnapshotConfig snapshot = const SnapshotConfig(path: 'goldens/[test]/[name].png'),
 }) {
   return Config(
     suite: suite,
