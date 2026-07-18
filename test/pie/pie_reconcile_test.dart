@@ -45,19 +45,19 @@ void main() {
       // -- Case B (valid): drilled in, chain survives a data change. ----------
       await _resetTo(tester, controller, _journeyData);
       await _drill(tester, controller, [_foodIndex, _restaurantIndex]);
-      expect(_keys(controller.path), ['Food', 'Restaurant']);
+      expect(controller.path, ['Food', 'Restaurant']);
       await tester.snapshot('01_restaurant_before', key: _Keys.sample, variations: false);
 
       // New data: same keys, reordered at every level with new values. The user
       // stays inside Restaurant; the level just snaps to the new proportions.
       await _swap(tester, _reorderedData);
-      expect(_keys(controller.path), ['Food', 'Restaurant']);
+      expect(controller.path, ['Food', 'Restaurant']);
       await tester.snapshot('02_restaurant_after_reorder', key: _Keys.sample, variations: false);
 
       // -- Case B (broken): drilled deep, leaf disappears -> reset to root. ----
       await _resetTo(tester, controller, _journeyData);
       await _drill(tester, controller, [_foodIndex, _restaurantIndex, _mcDonaldsIndex]);
-      expect(_keys(controller.path), ['Food', 'Restaurant', "McDonald's"]);
+      expect(controller.path, ['Food', 'Restaurant', "McDonald's"]);
       await tester.snapshot('03_mcdonalds_before', key: _Keys.sample, variations: false);
 
       // McDonald's no longer exists under Restaurant: the user is kicked out.
@@ -79,7 +79,7 @@ void main() {
       // the whole "Food" branch is gone while the user is deep inside it.
       await _resetTo(tester, controller, _journeyData);
       await _drill(tester, controller, [_foodIndex, _restaurantIndex]);
-      expect(_keys(controller.path), ['Food', 'Restaurant']);
+      expect(controller.path, ['Food', 'Restaurant']);
       await _swap(tester, _foodRemovedData);
       expect(controller.path, isEmpty);
 
@@ -87,14 +87,12 @@ void main() {
       // when a *sibling* of that child is removed (KFC gone, McDonald's stays).
       await _resetTo(tester, controller, _journeyData);
       await _drill(tester, controller, [_foodIndex, _restaurantIndex, _mcDonaldsIndex]);
-      expect(_keys(controller.path), ['Food', 'Restaurant', "McDonald's"]);
+      expect(controller.path, ['Food', 'Restaurant', "McDonald's"]);
       await _swap(tester, _kfcRemovedData);
-      expect(_keys(controller.path), ['Food', 'Restaurant', "McDonald's"]);
+      expect(controller.path, ['Food', 'Restaurant', "McDonald's"]);
     },
   );
 }
-
-List<Object> _keys(List<ComminglePieSlice> path) => [for (final slice in path) slice.key];
 
 /// Clears any drill state and installs [slices] as the current data.
 Future<void> _resetTo(
@@ -107,15 +105,18 @@ Future<void> _resetTo(
   await tester.widgetTester.pumpAndSettle();
 }
 
-/// Expands each index in [path] in turn, settling between steps.
+/// Expands each index in [path] in turn (resolving the key at each level),
+/// settling between steps.
 Future<void> _drill(
   TapTester tester,
   ComminglePieChartController controller,
   List<int> path,
 ) async {
+  var slices = _data.value;
   for (final index in path) {
-    controller.expand(index);
+    controller.expand(slices[index].key);
     await tester.widgetTester.pumpAndSettle();
+    slices = slices[index].slices;
   }
 }
 

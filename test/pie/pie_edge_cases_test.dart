@@ -38,7 +38,7 @@ void main() {
       expect(controller.path, isEmpty);
       // Expanding an empty chart is a guarded no-op — it must not throw or
       // create a phantom path entry.
-      controller.expand(0);
+      controller.expand('missing');
       await tester.widgetTester.pumpAndSettle();
       expect(controller.path, isEmpty);
       await tester.snapshot('01_no_sections', key: _Keys.sample, variations: false);
@@ -50,9 +50,9 @@ void main() {
       await tester.snapshot('02_single_section', key: _Keys.sample, variations: false);
       // Drilling the lone leaf keeps it as the (only) level; collapsing pops
       // back to the top.
-      controller.expand(0);
+      controller.expand(single.first.key);
       await tester.widgetTester.pumpAndSettle();
-      expect(_keys(controller.path), [single.first.key]);
+      expect(controller.path, [single.first.key]);
       controller.collapse();
       await tester.widgetTester.pumpAndSettle();
       expect(controller.path, isEmpty);
@@ -62,10 +62,10 @@ void main() {
       await _install(tester, controller, equal);
       expect(controller.path, isEmpty);
       await tester.snapshot('03_hundred_equal', key: _Keys.sample, variations: false);
-      // Any specific arc can still be addressed and drilled by index.
-      controller.expand(42);
+      // Any specific arc can still be addressed and drilled by key.
+      controller.expand(equal[42].key);
       await tester.widgetTester.pumpAndSettle();
-      expect(_keys(controller.path), [equal[42].key]);
+      expect(controller.path, [equal[42].key]);
       controller.reset();
       await tester.widgetTester.pumpAndSettle();
       expect(controller.path, isEmpty);
@@ -76,24 +76,22 @@ void main() {
       await _install(tester, controller, dominantTail);
       expect(controller.path, isEmpty);
       await tester.snapshot('04_dominant_with_long_tail', key: _Keys.sample, variations: false);
-      // The dominant arc (index 0) drills like any other.
-      controller.expand(0);
+      // The dominant arc drills like any other.
+      controller.expand(dominantTail.first.key);
       await tester.widgetTester.pumpAndSettle();
-      expect(_keys(controller.path), [dominantTail.first.key]);
-      // A tail arc, despite being tiny, is still reachable by index.
+      expect(controller.path, [dominantTail.first.key]);
+      // A tail arc, despite being tiny, is still reachable by key.
       controller.reset();
       await tester.widgetTester.pumpAndSettle();
-      controller.expand(1);
+      controller.expand(dominantTail[1].key);
       await tester.widgetTester.pumpAndSettle();
-      expect(_keys(controller.path), [dominantTail[1].key]);
+      expect(controller.path, [dominantTail[1].key]);
       controller.reset();
       await tester.widgetTester.pumpAndSettle();
       expect(controller.path, isEmpty);
     },
   );
 }
-
-List<Object> _keys(List<ComminglePieSlice> path) => [for (final slice in path) slice.key];
 
 /// Clears any drill state and installs [slices] as the current data.
 Future<void> _install(

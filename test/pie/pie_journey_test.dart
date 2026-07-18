@@ -65,9 +65,9 @@ void main() {
       await _captureExpand(
         tester: tester,
         controller: controller,
-        index: _homeIndex,
+        key: home.key,
         label: '02_entering_home',
-        expectedPathAtStart: [home],
+        expectedPathAtStart: [home.key],
         frameStep: frameStep,
       );
       await _captureCollapse(
@@ -82,39 +82,39 @@ void main() {
       await _captureExpand(
         tester: tester,
         controller: controller,
-        index: _foodIndex,
+        key: food.key,
         label: '04_entering_food',
-        expectedPathAtStart: [food],
+        expectedPathAtStart: [food.key],
         frameStep: frameStep,
       );
       await _captureExpand(
         tester: tester,
         controller: controller,
-        index: _restaurantIndex,
+        key: restaurant.key,
         label: '05_entering_restaurant',
-        expectedPathAtStart: [food, restaurant],
+        expectedPathAtStart: [food.key, restaurant.key],
         frameStep: frameStep,
       );
       await _captureExpand(
         tester: tester,
         controller: controller,
-        index: _mcDonaldsIndex,
+        key: mcDonalds.key,
         label: '06_entering_mcdonalds',
-        expectedPathAtStart: [food, restaurant, mcDonalds],
+        expectedPathAtStart: [food.key, restaurant.key, mcDonalds.key],
         frameStep: frameStep,
       );
       await _captureCollapse(
         tester: tester,
         controller: controller,
         label: '07_leaving_mcdonalds',
-        expectedPathAtStart: [food, restaurant],
+        expectedPathAtStart: [food.key, restaurant.key],
         frameStep: frameStep,
       );
       await _captureCollapse(
         tester: tester,
         controller: controller,
         label: '08_leaving_restaurant',
-        expectedPathAtStart: [food],
+        expectedPathAtStart: [food.key],
         frameStep: frameStep,
       );
       await _captureCollapse(
@@ -137,19 +137,19 @@ Future<void> _prepareView(TapTester tester) async {
   await tester.widgetTester.pump();
 }
 
-/// Drills into [index] and captures `${label}_000..N` across the animation.
+/// Drills into [key] and captures `${label}_000..N` across the animation.
 Future<void> _captureExpand({
   required TapTester tester,
   required ComminglePieChartController controller,
-  required int index,
+  required ComminglePieSliceKey key,
   required String label,
-  required List<ComminglePieSlice> expectedPathAtStart,
+  required List<ComminglePieSliceKey> expectedPathAtStart,
   required Duration frameStep,
 }) async {
   await _capturePhase(
     tester: tester,
     controller: controller,
-    action: () => controller.expand(index),
+    action: () => controller.expand(key),
     label: label,
     expectedPathAtStart: expectedPathAtStart,
     frameStep: frameStep,
@@ -161,7 +161,7 @@ Future<void> _captureCollapse({
   required TapTester tester,
   required ComminglePieChartController controller,
   required String label,
-  required List<ComminglePieSlice> expectedPathAtStart,
+  required List<ComminglePieSliceKey> expectedPathAtStart,
   required Duration frameStep,
 }) async {
   await _capturePhase(
@@ -179,13 +179,13 @@ Future<void> _capturePhase({
   required ComminglePieChartController controller,
   required VoidCallback action,
   required String label,
-  required List<ComminglePieSlice> expectedPathAtStart,
+  required List<ComminglePieSliceKey> expectedPathAtStart,
   required Duration frameStep,
 }) async {
   // The path notification fires as soon as the transition starts.
-  List<ComminglePieSlice>? pathFromListener;
+  List<ComminglePieSliceKey>? pathFromListener;
   void onPath() {
-    pathFromListener ??= List<ComminglePieSlice>.of(controller.path);
+    pathFromListener ??= List<ComminglePieSliceKey>.of(controller.path);
   }
 
   controller.addListener(onPath);

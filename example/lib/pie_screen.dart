@@ -85,8 +85,9 @@ class _PieScreenState extends State<PieScreen> {
                     child: FBreadcrumb(
                       children: [
                         const FBreadcrumbItem(child: Text('July spending')),
-                        for (final (index, slice) in path.indexed)
-                          FBreadcrumbItem(current: index == path.length - 1, child: slice.titleBuilder(context)),
+                        for (final key in path)
+                          if (_findSliceByKey(pieDrillDemoData, key) case final slice?)
+                            FBreadcrumbItem(current: key == path.last, child: slice.titleBuilder(context)),
                       ],
                     ),
                   ),
@@ -111,6 +112,15 @@ class _PieScreenState extends State<PieScreen> {
       ),
     );
   }
+}
+
+ComminglePieSlice? _findSliceByKey(List<ComminglePieSlice> slices, Object key) {
+  for (final slice in slices) {
+    if (slice.key == key) return slice;
+    final found = _findSliceByKey(slice.slices, key);
+    if (found != null) return found;
+  }
+  return null;
 }
 
 class _DemoChartHub extends StatelessWidget {

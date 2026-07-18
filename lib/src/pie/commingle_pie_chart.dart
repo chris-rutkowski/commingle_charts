@@ -94,7 +94,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
     widget.controller?.attach(
       reset: _reset,
       collapse: _collapse,
-      expand: _expand,
+      expand: _expandByKey,
     );
     _syncControllerPath();
   }
@@ -148,7 +148,8 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
   }
 
   void _syncControllerPath() {
-    widget.controller?.updatePath(_slicesAlongIndices(_effectivePathIndices));
+    final slices = _slicesAlongIndices(_effectivePathIndices);
+    widget.controller?.updatePath([for (final slice in slices) slice.key]);
   }
 
   void _onExpansionStatus(AnimationStatus status) {
@@ -192,12 +193,12 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
       oldWidget.controller?.detach(
         reset: _reset,
         collapse: _collapse,
-        expand: _expand,
+        expand: _expandByKey,
       );
       widget.controller?.attach(
         reset: _reset,
         collapse: _collapse,
-        expand: _expand,
+        expand: _expandByKey,
       );
       _syncControllerPath();
     }
@@ -246,8 +247,8 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
 
   /// Keys of the slices [path] points at in [tree], or null if [path] no longer
   /// resolves (e.g. old data shape).
-  List<Object>? _keyChainForPath(List<ComminglePieSlice> tree, List<int> path) {
-    final keys = <Object>[];
+  List<ComminglePieSliceKey>? _keyChainForPath(List<ComminglePieSlice> tree, List<int> path) {
+    final keys = <ComminglePieSliceKey>[];
     var slices = tree;
     for (final index in path) {
       if (index < 0 || index >= slices.length) return null;
@@ -260,7 +261,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
 
   /// Maps [keyChain] onto [tree], returning the index path or null if any level
   /// no longer contains the expected key.
-  List<int>? _remapPathByKeys(List<Object> keyChain, List<ComminglePieSlice> tree) {
+  List<int>? _remapPathByKeys(List<ComminglePieSliceKey> keyChain, List<ComminglePieSlice> tree) {
     final indices = <int>[];
     var slices = tree;
     for (final key in keyChain) {
@@ -294,7 +295,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
     widget.controller?.detach(
       reset: _reset,
       collapse: _collapse,
-      expand: _expand,
+      expand: _expandByKey,
     );
     _expansion.dispose();
     super.dispose();
@@ -375,6 +376,17 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
     if (event is FlTapCancelEvent || event is FlPanEndEvent || event is FlLongPressEnd) {
       setState(() => _hotIndex = null);
     }
+  }
+
+  /// Controller entry point: expand the current-level slice with [key].
+  ///
+  /// Settles any in-flight transition first (via [_expand]) so the lookup runs
+  /// against the committed current level. No-op if the key isn't present.
+  void _expandByKey(ComminglePieSliceKey key) {
+    if (_isBusy) _settle();
+    final index = _currentSlices.indexWhere((slice) => slice.key == key);
+    if (index < 0) return;
+    _expand(index);
   }
 
   void _expand(int index) {

@@ -49,9 +49,9 @@ void main() {
       await _captureSettled(
         tester: tester,
         controller: controller,
-        action: () => controller.expand(_homeIndex),
+        action: () => controller.expand(home.key),
         label: '02_home',
-        expectedPath: [home],
+        expectedPath: [home.key],
       );
       await _captureSettled(
         tester: tester,
@@ -65,37 +65,37 @@ void main() {
       await _captureSettled(
         tester: tester,
         controller: controller,
-        action: () => controller.expand(_foodIndex),
+        action: () => controller.expand(food.key),
         label: '04_food',
-        expectedPath: [food],
+        expectedPath: [food.key],
       );
       await _captureSettled(
         tester: tester,
         controller: controller,
-        action: () => controller.expand(_restaurantIndex),
+        action: () => controller.expand(restaurant.key),
         label: '05_restaurant',
-        expectedPath: [food, restaurant],
+        expectedPath: [food.key, restaurant.key],
       );
       await _captureSettled(
         tester: tester,
         controller: controller,
-        action: () => controller.expand(_mcDonaldsIndex),
+        action: () => controller.expand(mcDonalds.key),
         label: '06_mcdonalds',
-        expectedPath: [food, restaurant, mcDonalds],
+        expectedPath: [food.key, restaurant.key, mcDonalds.key],
       );
       await _captureSettled(
         tester: tester,
         controller: controller,
         action: controller.collapse,
         label: '07_restaurant',
-        expectedPath: [food, restaurant],
+        expectedPath: [food.key, restaurant.key],
       );
       await _captureSettled(
         tester: tester,
         controller: controller,
         action: controller.collapse,
         label: '08_food',
-        expectedPath: [food],
+        expectedPath: [food.key],
       );
       await _captureSettled(
         tester: tester,
@@ -125,7 +125,7 @@ Future<void> _captureSettled({
   required ComminglePieChartController controller,
   required VoidCallback action,
   required String label,
-  required List<ComminglePieSlice> expectedPath,
+  required List<ComminglePieSliceKey> expectedPath,
 }) async {
   action();
   await tester.widgetTester.pumpAndSettle();
