@@ -234,18 +234,17 @@ final class _ChartHost extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topLeft,
-      child: ColoredBox(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: SizedBox.square(
-          dimension: size,
-          child: RepaintBoundary(
-            key: _Keys.sample,
+      child: SizedBox.square(
+        dimension: size,
+        child: RepaintBoundary(
+          key: _Keys.sample,
+          child: Padding(
+            padding: const EdgeInsets.all(_ringPadding),
             child: ComminglePieChart(
               slices: slices,
               controller: controller,
               badgeDiameter: _badgeDiameter,
               ringThickness: _ringThickness,
-              ringPadding: _ringPadding,
               fullIconSweep: 0.4,
               minIconSweep: 0.2,
             ),

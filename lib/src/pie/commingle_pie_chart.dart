@@ -10,7 +10,7 @@ import 'commingle_pie_slice.dart';
 
 const awesomePieChartDefaultBadgeDiameter = 28.0;
 const awesomePieChartDefaultRingThickness = 56.0;
-const awesomePieChartDefaultRingPadding = 8.0;
+const awesomePieChartDefaultPressedGrowth = 8.0;
 const awesomePieChartDefaultAnimationDuration = Duration(milliseconds: 450);
 
 const _sectionsSpaceDegrees = 2.5;
@@ -31,8 +31,11 @@ final class ComminglePieChart extends StatefulWidget {
   /// Thickness (in logical pixels) of the painted ring.
   final double ringThickness;
 
-  /// Padding (in logical pixels) between the chart bounds and the ring's outer edge.
-  final double ringPadding;
+  /// How far (in logical pixels) a slice's outer edge grows while it is pressed.
+  ///
+  /// The pressed slice draws beyond the widget's bounds via fl_chart's overdraw;
+  /// wrap the chart in your own [Padding] if you need to reserve space for it.
+  final double pressedGrowth;
 
   /// Section sweep (radians) at/above which a badge is full size (angle₂).
   final double? fullIconSweep;
@@ -48,7 +51,7 @@ final class ComminglePieChart extends StatefulWidget {
     this.animationCurve = Curves.easeOutCubic,
     this.badgeDiameter = awesomePieChartDefaultBadgeDiameter,
     this.ringThickness = awesomePieChartDefaultRingThickness,
-    this.ringPadding = awesomePieChartDefaultRingPadding,
+    this.pressedGrowth = awesomePieChartDefaultPressedGrowth,
     this.fullIconSweep,
     this.minIconSweep,
   });
@@ -206,7 +209,6 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
             awesomePieChartFullIconSweep(
               size: size,
               badgeDiameter: widget.badgeDiameter,
-              ringPadding: widget.ringPadding,
               ringThickness: widget.ringThickness,
             );
         final minIconSweep = widget.minIconSweep ?? fullIconSweep / 2;
@@ -225,7 +227,6 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
                 fullIconSweep: fullIconSweep,
                 badgeDiameter: widget.badgeDiameter,
                 ringThickness: widget.ringThickness,
-                ringPadding: widget.ringPadding,
               );
             },
           );
@@ -242,7 +243,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
           fullIconSweep: fullIconSweep,
           badgeDiameter: widget.badgeDiameter,
           ringThickness: widget.ringThickness,
-          ringPadding: widget.ringPadding,
+          pressedGrowth: widget.pressedGrowth,
           onTouch: _handleTouch,
         );
       },
@@ -341,7 +342,6 @@ final class _ExpandFrame extends StatelessWidget {
   final double fullIconSweep;
   final double badgeDiameter;
   final double ringThickness;
-  final double ringPadding;
 
   const _ExpandFrame({
     required this.slices,
@@ -353,7 +353,6 @@ final class _ExpandFrame extends StatelessWidget {
     required this.fullIconSweep,
     required this.badgeDiameter,
     required this.ringThickness,
-    required this.ringPadding,
   });
 
   @override
@@ -363,10 +362,7 @@ final class _ExpandFrame extends StatelessWidget {
     final values = _expandedParentValues(slices, selectedIndex, t);
     final sum = values.fold<double>(0, (total, value) => total + value);
     if (sum <= 0) {
-      return ColoredBox(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: SizedBox.square(dimension: size),
-      );
+      return SizedBox.square(dimension: size);
     }
     final sweeps = [for (final value in values) value / sum * 2 * math.pi];
     final fixedMidpoint = _restingMidpoint(slices, selectedIndex, startOffset: startOffset);
@@ -385,7 +381,6 @@ final class _ExpandFrame extends StatelessWidget {
         color: selected.color,
         midDegree: fixedMidpoint,
         ringThickness: ringThickness,
-        ringPadding: ringPadding,
         badgeDiameter: badgeDiameter,
         badge: _badgeForSweep(
           context: context,
@@ -402,9 +397,7 @@ final class _ExpandFrame extends StatelessWidget {
       size: size,
       offset: offset,
       ringThickness: ringThickness,
-      ringPadding: ringPadding,
       sectionsSpace: sectionsSpace,
-      withBackground: !showChildren,
       slices: [
         for (var i = 0; i < slices.length; i++)
           if (values[i] > 0)
@@ -424,35 +417,31 @@ final class _ExpandFrame extends StatelessWidget {
 
     if (!showChildren) return parentPie;
 
-    return ColoredBox(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: SizedBox.square(
-        dimension: size,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            if (t < 1) parentPie,
-            Opacity(
-              opacity: t,
-              child: _buildRingPie(
-                context: context,
-                size: size,
-                offset: offset,
-                ringThickness: ringThickness,
-                ringPadding: ringPadding,
-                sectionsSpace: selected.slices.length > 1 ? _sectionsSpaceDegrees : 0,
-                slices: _childOverlaySlices(
-                  parentSlices: slices,
-                  selectedIndex: selectedIndex,
-                  parentValues: values,
-                  valueSum: sum,
-                ),
-                minIconSweep: minIconSweep,
-                fullIconSweep: fullIconSweep,
+    return SizedBox.square(
+      dimension: size,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (t < 1) parentPie,
+          Opacity(
+            opacity: t,
+            child: _buildRingPie(
+              context: context,
+              size: size,
+              offset: offset,
+              ringThickness: ringThickness,
+              sectionsSpace: selected.slices.length > 1 ? _sectionsSpaceDegrees : 0,
+              slices: _childOverlaySlices(
+                parentSlices: slices,
+                selectedIndex: selectedIndex,
+                parentValues: values,
+                valueSum: sum,
               ),
+              minIconSweep: minIconSweep,
+              fullIconSweep: fullIconSweep,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -463,7 +452,6 @@ final class _ClosedRing extends StatelessWidget {
   final Color color;
   final double midDegree;
   final double ringThickness;
-  final double ringPadding;
   final double badgeDiameter;
   final Widget? badge;
 
@@ -472,14 +460,13 @@ final class _ClosedRing extends StatelessWidget {
     required this.color,
     required this.midDegree,
     required this.ringThickness,
-    required this.ringPadding,
     required this.badgeDiameter,
     required this.badge,
   });
 
   @override
   Widget build(BuildContext context) {
-    final hole = size / 2 - ringPadding - ringThickness;
+    final hole = size / 2 - ringThickness;
     final midRadius = hole + ringThickness / 2;
     final midRadians = midDegree * math.pi / 180;
     final badgeOffset = Offset(
@@ -487,28 +474,25 @@ final class _ClosedRing extends StatelessWidget {
       size / 2 + midRadius * math.sin(midRadians),
     );
 
-    return ColoredBox(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: SizedBox.square(
-        dimension: size,
-        child: Stack(
-          children: [
-            CustomPaint(
-              size: Size.square(size),
-              painter: _ClosedRingPainter(
-                color: color,
-                holeRadius: hole,
-                thickness: ringThickness,
-              ),
+    return SizedBox.square(
+      dimension: size,
+      child: Stack(
+        children: [
+          CustomPaint(
+            size: Size.square(size),
+            painter: _ClosedRingPainter(
+              color: color,
+              holeRadius: hole,
+              thickness: ringThickness,
             ),
-            if (badge != null)
-              Positioned(
-                left: badgeOffset.dx - badgeDiameter / 2,
-                top: badgeOffset.dy - badgeDiameter / 2,
-                child: badge!,
-              ),
-          ],
-        ),
+          ),
+          if (badge != null)
+            Positioned(
+              left: badgeOffset.dx - badgeDiameter / 2,
+              top: badgeOffset.dy - badgeDiameter / 2,
+              child: badge!,
+            ),
+        ],
       ),
     );
   }
@@ -567,11 +551,9 @@ Widget _buildRingPie({
   required double minIconSweep,
   required double fullIconSweep,
   required double ringThickness,
-  required double ringPadding,
   double sectionsSpace = _sectionsSpaceDegrees,
-  bool withBackground = false,
 }) {
-  final hole = size / 2 - ringPadding - ringThickness;
+  final hole = size / 2 - ringThickness;
 
   final chart = SizedBox.square(
     dimension: size,
@@ -606,12 +588,7 @@ Widget _buildRingPie({
     ),
   );
 
-  if (!withBackground) return chart;
-
-  return ColoredBox(
-    color: Theme.of(context).scaffoldBackgroundColor,
-    child: chart,
-  );
+  return chart;
 }
 
 List<_RingSlice> _childOverlaySlices({
@@ -686,7 +663,7 @@ final class _RestingPie extends StatelessWidget {
   final double fullIconSweep;
   final double badgeDiameter;
   final double ringThickness;
-  final double ringPadding;
+  final double pressedGrowth;
   final void Function(FlTouchEvent, PieTouchResponse?) onTouch;
 
   const _RestingPie({
@@ -700,20 +677,17 @@ final class _RestingPie extends StatelessWidget {
     required this.fullIconSweep,
     required this.badgeDiameter,
     required this.ringThickness,
-    required this.ringPadding,
+    required this.pressedGrowth,
     required this.onTouch,
   });
 
   @override
   Widget build(BuildContext context) {
     if (slices.isEmpty) {
-      return ColoredBox(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: SizedBox.square(dimension: size),
-      );
+      return SizedBox.square(dimension: size);
     }
 
-    final hole = size / 2 - ringPadding - ringThickness;
+    final hole = size / 2 - ringThickness;
     final total = slices.fold<double>(0, (sum, section) => sum + section.value);
     final sweeps = [
       for (final section in slices) section.value / total * 2 * math.pi,
@@ -729,7 +703,6 @@ final class _RestingPie extends StatelessWidget {
         color: section.color,
         midDegree: mid,
         ringThickness: ringThickness,
-        ringPadding: ringPadding,
         badgeDiameter: badgeDiameter,
         badge: _badgeForSweep(
           context: context,
@@ -759,7 +732,7 @@ final class _RestingPie extends StatelessWidget {
               PieChartSectionData(
                 value: slices[i].value,
                 color: slices[i].color,
-                radius: hotIndex == i ? ringThickness + 8 : ringThickness,
+                radius: hotIndex == i ? ringThickness + pressedGrowth : ringThickness,
                 showTitle: false,
                 badgeWidget: _badgeForSweep(
                   context: context,
@@ -781,10 +754,9 @@ final class _RestingPie extends StatelessWidget {
 double awesomePieChartFullIconSweep({
   double size = 320,
   double badgeDiameter = awesomePieChartDefaultBadgeDiameter,
-  double ringPadding = awesomePieChartDefaultRingPadding,
   double ringThickness = awesomePieChartDefaultRingThickness,
 }) {
-  final midRadius = size / 2 - ringPadding - ringThickness / 2;
+  final midRadius = size / 2 - ringThickness / 2;
   return 2 * math.asin((badgeDiameter / 2) / midRadius);
 }
 
@@ -792,13 +764,11 @@ double awesomePieChartFullIconSweep({
 double awesomePieChartMinIconSweep({
   double size = 320,
   double badgeDiameter = awesomePieChartDefaultBadgeDiameter,
-  double ringPadding = awesomePieChartDefaultRingPadding,
   double ringThickness = awesomePieChartDefaultRingThickness,
 }) =>
     awesomePieChartFullIconSweep(
       size: size,
       badgeDiameter: badgeDiameter,
-      ringPadding: ringPadding,
       ringThickness: ringThickness,
     ) /
     2;

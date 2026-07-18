@@ -8,9 +8,10 @@ class MenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FScaffold(
-      header: const FHeader.nested(title: Text('Commingle Charts')),
-      child: Column(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Commingle Charts')),
+      body: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
           FTileGroup(
             children: [

@@ -22,13 +22,9 @@ class _PieScreenState extends State<PieScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FScaffold(
-      header: FHeader.nested(
-        title: const Text('Commingle Pie Chart'),
-        prefixes: [FHeaderAction.back(onPress: () => Navigator.of(context).pop())],
-      ),
-      child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Commingle Pie Chart')),
+      body: ListView(
         children: [
           const SizedBox(height: 8),
           Text(
@@ -37,26 +33,36 @@ class _PieScreenState extends State<PieScreen> {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 24),
-          AspectRatio(
-            aspectRatio: 1,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                ComminglePieChart(
-                  slices: pieDrillDemoData,
-                  controller: _chartController,
-                  animationDuration: const Duration(milliseconds: 500),
-                  animationCurve: Curves.easeInOut,
-                  fullIconSweep: 0.4,
-                  minIconSweep: 0.2,
+          Container(
+            color: Colors.yellow,
+            child: Padding(
+              // reserves a space for pressedGrowth
+              padding: const EdgeInsets.all(16.0),
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ComminglePieChart(
+                      slices: pieDrillDemoData,
+                      controller: _chartController,
+                      animationDuration: const Duration(milliseconds: 500),
+                      animationCurve: Curves.easeInOut,
+                      fullIconSweep: 0.4,
+                      minIconSweep: 0.2,
+                      pressedGrowth: 16.0,
+                    ),
+                    ListenableBuilder(
+                      listenable: _chartController,
+                      builder: (context, _) {
+                        return _DemoChartHub(
+                          onReset: _chartController.path.isNotEmpty ? _chartController.collapse : null,
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                ListenableBuilder(
-                  listenable: _chartController,
-                  builder: (context, _) {
-                    return _DemoChartHub(onReset: _chartController.path.isNotEmpty ? _chartController.collapse : null);
-                  },
-                ),
-              ],
+              ),
             ),
           ),
           const SizedBox(height: 24),

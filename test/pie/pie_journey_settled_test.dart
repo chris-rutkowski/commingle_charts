@@ -11,6 +11,7 @@ abstract final class _Keys {
 }
 
 const _chartSize = 320.0;
+const _ringPadding = 8.0;
 
 // Drill indices into [_journeyData].
 const _homeIndex = 1;
@@ -153,11 +154,14 @@ final class _ChartHost extends StatelessWidget {
           dimension: size,
           child: RepaintBoundary(
             key: _Keys.sample,
-            child: ComminglePieChart(
-              slices: slices,
-              controller: controller,
-              fullIconSweep: 0.4,
-              minIconSweep: 0.2,
+            child: Padding(
+              padding: const EdgeInsets.all(_ringPadding),
+              child: ComminglePieChart(
+                slices: slices,
+                controller: controller,
+                fullIconSweep: 0.4,
+                minIconSweep: 0.2,
+              ),
             ),
           ),
         ),
