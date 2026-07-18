@@ -50,7 +50,11 @@ class _PieScreenState extends State<PieScreen> {
                       animationCurve: Curves.easeInOut,
                       fullIconSweep: 0.4,
                       minIconSweep: 0.2,
-                      pressedGrowth: 16.0,
+                      pressedGrowth: 8.0,
+                      pressGrowthAnimation: const CommingleChartsAnimation(
+                        duration: Duration(milliseconds: 150),
+                        curve: Curves.easeOut,
+                      ),
                     ),
                     ListenableBuilder(
                       listenable: _chartController,

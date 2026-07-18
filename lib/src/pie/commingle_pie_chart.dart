@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../commingle_charts_animation.dart';
 import 'commingle_pie_chart_controller.dart';
 import 'commingle_pie_slice.dart';
 
@@ -37,6 +38,12 @@ final class ComminglePieChart extends StatefulWidget {
   /// wrap the chart in your own [Padding] if you need to reserve space for it.
   final double pressedGrowth;
 
+  /// Animates the pressed-slice growth (and shrink on release).
+  ///
+  /// Provide both a duration and curve to animate; leave null for an instant
+  /// grow/shrink.
+  final CommingleChartsAnimation? pressGrowthAnimation;
+
   /// Section sweep (radians) at/above which a badge is full size (angle₂).
   final double? fullIconSweep;
 
@@ -52,6 +59,7 @@ final class ComminglePieChart extends StatefulWidget {
     this.badgeDiameter = awesomePieChartDefaultBadgeDiameter,
     this.ringThickness = awesomePieChartDefaultRingThickness,
     this.pressedGrowth = awesomePieChartDefaultPressedGrowth,
+    this.pressGrowthAnimation,
     this.fullIconSweep,
     this.minIconSweep,
   });
@@ -244,6 +252,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
           badgeDiameter: widget.badgeDiameter,
           ringThickness: widget.ringThickness,
           pressedGrowth: widget.pressedGrowth,
+          pressGrowthAnimation: widget.pressGrowthAnimation,
           onTouch: _handleTouch,
         );
       },
@@ -664,6 +673,7 @@ final class _RestingPie extends StatelessWidget {
   final double badgeDiameter;
   final double ringThickness;
   final double pressedGrowth;
+  final CommingleChartsAnimation? pressGrowthAnimation;
   final void Function(FlTouchEvent, PieTouchResponse?) onTouch;
 
   const _RestingPie({
@@ -678,6 +688,7 @@ final class _RestingPie extends StatelessWidget {
     required this.badgeDiameter,
     required this.ringThickness,
     required this.pressedGrowth,
+    required this.pressGrowthAnimation,
     required this.onTouch,
   });
 
@@ -717,8 +728,8 @@ final class _RestingPie extends StatelessWidget {
     return SizedBox.square(
       dimension: size,
       child: PieChart(
-        duration: Duration.zero,
-        curve: animationCurve,
+        duration: pressGrowthAnimation?.duration ?? Duration.zero,
+        curve: pressGrowthAnimation?.curve ?? animationCurve,
         PieChartData(
           startDegreeOffset: startOffset,
           sectionsSpace: sectionsSpace,
