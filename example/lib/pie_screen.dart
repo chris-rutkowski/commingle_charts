@@ -23,7 +23,10 @@ class _PieScreenState extends State<PieScreen> {
   @override
   Widget build(BuildContext context) {
     return FScaffold(
-      header: const FHeader(title: Text('ComminglePieChart')),
+      header: FHeader.nested(
+        title: const Text('Commingle Pie Chart'),
+        prefixes: [FHeaderAction.back(onPress: () => Navigator.of(context).pop())],
+      ),
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         children: [
@@ -50,13 +53,42 @@ class _PieScreenState extends State<PieScreen> {
                 ListenableBuilder(
                   listenable: _chartController,
                   builder: (context, _) {
-                    return _DemoChartHub(
-                      onReset: _chartController.path.isNotEmpty ? _chartController.collapse : null,
-                    );
+                    return _DemoChartHub(onReset: _chartController.path.isNotEmpty ? _chartController.collapse : null);
                   },
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 24),
+          ListenableBuilder(
+            listenable: _chartController,
+            builder: (context, _) {
+              final path = _chartController.path;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FBreadcrumb(
+                    children: [
+                      const FBreadcrumbItem(child: Text('July spending')),
+                      for (final (index, slice) in path.indexed)
+                        FBreadcrumbItem(current: index == path.length - 1, child: slice.titleBuilder(context)),
+                    ],
+                  ),
+                  if (path.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    FButton(
+                      variant: FButtonVariant.secondary,
+                      mainAxisSize: MainAxisSize.min,
+                      style: FButtonStyleDelta.delta(
+                        tappableStyle: FTappableStyleDelta.delta(motion: FTappableMotion.none),
+                      ),
+                      onPress: _chartController.collapse,
+                      child: const Text('Back'),
+                    ),
+                  ],
+                ],
+              );
+            },
           ),
           const SizedBox(height: 48),
         ],
@@ -76,18 +108,13 @@ class _DemoChartHub extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            'July spending',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
+          Text('July spending', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 4),
           Text(
             '100%',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.5,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.5),
           ),
           if (onReset != null) ...[
             const SizedBox(height: 8),
