@@ -92,7 +92,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
     )..addStatusListener(_onExpansionStatus);
     widget.controller?.attach(
       reset: _reset,
-      collapse: _collapse,
+      collapseTo: _collapseTo,
       expand: _expandByKey,
     );
     _syncControllerPath();
@@ -191,12 +191,12 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
     if (oldWidget.controller != widget.controller) {
       oldWidget.controller?.detach(
         reset: _reset,
-        collapse: _collapse,
+        collapseTo: _collapseTo,
         expand: _expandByKey,
       );
       widget.controller?.attach(
         reset: _reset,
-        collapse: _collapse,
+        collapseTo: _collapseTo,
         expand: _expandByKey,
       );
       _syncControllerPath();
@@ -293,7 +293,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
   void dispose() {
     widget.controller?.detach(
       reset: _reset,
-      collapse: _collapse,
+      collapseTo: _collapseTo,
       expand: _expandByKey,
     );
     _expansion.dispose();
@@ -402,12 +402,17 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
     _expansion.forward(from: 0);
   }
 
-  void _collapse() {
+  /// Collapses back to [depth] path entries (0 = root) with a single reverse
+  /// animation, skipping any intermediate levels. No-op if [depth] is not a
+  /// strict ancestor of the current level. Passing `_path.length - 1` collapses
+  /// a single level (or reverses an in-flight transition).
+  void _collapseTo(int depth) {
     if (_isBusy) _settle();
-    if (_path.isEmpty) return;
+    if (depth < 0 || depth >= _path.length) return;
     unawaited(HapticFeedback.selectionClick());
-    final index = _path.removeLast();
-    _offsetStack.removeLast();
+    final index = _path[depth];
+    _path.removeRange(depth, _path.length);
+    _offsetStack.removeRange(depth + 1, _offsetStack.length);
     setState(() {
       _drillIndex = index;
       _drillForward = false;

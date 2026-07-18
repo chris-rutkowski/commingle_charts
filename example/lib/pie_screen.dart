@@ -78,10 +78,18 @@ class _PieScreenState extends State<PieScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: FBreadcrumb(
                       children: [
-                        const FBreadcrumbItem(child: Text('July spending')),
+                        FBreadcrumbItem(
+                          current: path.isEmpty,
+                          onPress: path.isEmpty ? null : _chartController.collapseToRoot,
+                          child: const Text('July spending'),
+                        ),
                         for (final key in path)
                           if (_findSliceByKey(pieDrillDemoData, key) case final slice?)
-                            FBreadcrumbItem(current: key == path.last, child: slice.titleBuilder(context)),
+                            FBreadcrumbItem(
+                              current: key == path.last,
+                              onPress: key == path.last ? null : () => _chartController.collapseTo(key),
+                              child: slice.titleBuilder(context),
+                            ),
                       ],
                     ),
                   ),

@@ -37,6 +37,7 @@ void main() {
   );
 
   final controller = ComminglePieChartController();
+  final jumpController = ComminglePieChartController();
   final slices = _journeyData;
   final food = slices[_foodIndex];
   final restaurant = food.slices[_restaurantIndex];
@@ -121,6 +122,45 @@ void main() {
         tester: tester,
         controller: controller,
         label: '09_leaving_food',
+        expectedPathAtStart: const [],
+        frameStep: frameStep,
+      );
+    },
+  );
+
+  // Collapsing to an ancestor jumps there in a single animation, skipping the
+  // intermediate levels: from Restaurant we land at the top level directly.
+  tapTest(
+    'pie_jump_collapse',
+    tapTestConfig(
+      suite: 'pie_jump_collapse',
+      snapshot: const SnapshotConfig(path: 'goldens/[suite]/[name].png'),
+      home: _ChartHost(
+        size: _chartSize,
+        controller: jumpController,
+        slices: slices,
+      ),
+    ),
+    (tester) async {
+      timeDilation = 1.0;
+      await _prepareView(tester);
+
+      // Drill Food -> Restaurant and settle at the Restaurant level.
+      jumpController.expand(food.key);
+      await tester.widgetTester.pumpAndSettle();
+      jumpController.expand(restaurant.key);
+      await tester.widgetTester.pumpAndSettle();
+      expect(jumpController.path, [food.key, restaurant.key]);
+
+      await tester.snapshot('01_at_restaurant', key: _Keys.sample, variations: false);
+
+      // Jump straight back to the top level, capturing every frame of the
+      // single reverse animation.
+      await _capturePhase(
+        tester: tester,
+        controller: jumpController,
+        action: jumpController.collapseToRoot,
+        label: '02_jump_to_root',
         expectedPathAtStart: const [],
         frameStep: frameStep,
       );
