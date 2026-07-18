@@ -1,71 +1,100 @@
+import 'package:big_decimal/big_decimal.dart';
 import 'package:commingle_charts/commingle_charts.dart';
 import 'package:flutter/material.dart';
 
-const pieDrillDemoFoodIndex = 0;
-const pieDrillDemoHouseIndex = 1;
-const pieDrillDemoMovieIndex = 5;
-const pieDrillDemoRestaurantIndex = 0;
-const pieDrillDemoMcDonaldsIndex = 0;
+import 'financial_fragment.dart';
 
-/// Flat top-level demo data with Food child categories.
-List<ComminglePieSlice> get pieDrillDemoData => [
-  _section(
+/// Real July spending amounts as a [FinancialFragment] tree (total 1751).
+final _financialData = <FinancialFragment>[
+  FinancialFragment(
+    id: 'id_food',
+    value: BigDecimal.parse('420'),
     title: 'Food',
-    value: 420 / 1751,
     color: const Color(0xFFE53935),
     icon: Icons.restaurant_rounded,
-    slices: [
-      _section(
+    subfragments: [
+      FinancialFragment(
+        id: 'id_restaurant',
+        value: BigDecimal.parse('273'),
         title: 'Restaurant',
-        value: 0.65,
         color: const Color(0xFFB71C1C),
         icon: Icons.delivery_dining_rounded,
-        slices: [
-          _section(title: "McDonald's", value: 0.60, color: const Color(0xFF8B0000), icon: Icons.lunch_dining_rounded),
-          _section(title: 'KFC', value: 0.40, color: const Color(0xFFFF5722), icon: Icons.fastfood_rounded),
+        subfragments: [
+          FinancialFragment(
+            id: 'id_mcdonalds',
+            value: BigDecimal.parse('163.80'),
+            title: "McDonald's",
+            color: const Color(0xFF8B0000),
+            icon: Icons.lunch_dining_rounded,
+          ),
+          FinancialFragment(
+            id: 'id_kfc',
+            value: BigDecimal.parse('109.20'),
+            title: 'KFC',
+            color: const Color(0xFFFF5722),
+            icon: Icons.fastfood_rounded,
+          ),
         ],
       ),
-      _section(title: 'Groceries', value: 0.20, color: const Color(0xFFFF1744), icon: Icons.shopping_basket_rounded),
-      _section(title: 'Dessert', value: 0.10, color: const Color(0xFFFF8A80), icon: Icons.cake_rounded),
-      _section(title: 'Coffee', value: 0.05, color: const Color(0xFFFFCDD2), icon: Icons.local_cafe_rounded),
+      FinancialFragment(
+        id: 'id_groceries',
+        value: BigDecimal.parse('84'),
+        title: 'Groceries',
+        color: const Color(0xFFFF1744),
+        icon: Icons.shopping_basket_rounded,
+      ),
+      FinancialFragment(
+        id: 'id_dessert',
+        value: BigDecimal.parse('42'),
+        title: 'Dessert',
+        color: const Color(0xFFFF8A80),
+        icon: Icons.cake_rounded,
+      ),
+      FinancialFragment(
+        id: 'id_coffee',
+        value: BigDecimal.parse('21'),
+        title: 'Coffee',
+        color: const Color(0xFFFFCDD2),
+        icon: Icons.local_cafe_rounded,
+      ),
     ],
   ),
-  _section(title: 'Home', value: 680 / 1751, color: const Color(0xFF1E88E5), icon: Icons.home_rounded),
-  _section(title: 'Transport', value: 185 / 1751, color: const Color(0xFF43A047), icon: Icons.directions_car_rounded),
-  _section(title: 'Fun', value: 240 / 1751, color: const Color(0xFFFF9800), icon: Icons.celebration_rounded),
-  _section(title: 'Health', value: 130 / 1751, color: const Color(0xFF8E24AA), icon: Icons.favorite_rounded),
-  _section(title: 'Subscriptions', value: 96 / 1751, color: const Color(0xFF00ACC1), icon: Icons.subscriptions_rounded),
+  FinancialFragment(
+    id: 'id_home',
+    value: BigDecimal.parse('680'),
+    title: 'Home',
+    color: const Color(0xFF1E88E5),
+    icon: Icons.home_rounded,
+  ),
+  FinancialFragment(
+    id: 'id_transport',
+    value: BigDecimal.parse('185'),
+    title: 'Transport',
+    color: const Color(0xFF43A047),
+    icon: Icons.directions_car_rounded,
+  ),
+  FinancialFragment(
+    id: 'id_fun',
+    value: BigDecimal.parse('240'),
+    title: 'Fun',
+    color: const Color(0xFFFF9800),
+    icon: Icons.celebration_rounded,
+  ),
+  FinancialFragment(
+    id: 'id_health',
+    value: BigDecimal.parse('130'),
+    title: 'Health',
+    color: const Color(0xFF8E24AA),
+    icon: Icons.favorite_rounded,
+  ),
+  FinancialFragment(
+    id: 'id_subscriptions',
+    value: BigDecimal.parse('96'),
+    title: 'Subscriptions',
+    color: const Color(0xFF00ACC1),
+    icon: Icons.subscriptions_rounded,
+  ),
 ];
 
-ComminglePieSlice _section({
-  required String title,
-  required double value,
-  required Color color,
-  required IconData icon,
-  List<ComminglePieSlice> slices = const [],
-}) {
-  return ComminglePieSlice(
-    value: value,
-    color: color,
-    slices: slices,
-    iconBuilder: (context) => _badgeIcon(icon, color),
-    titleBuilder: (context) => Text(title, textAlign: .center, style: Theme.of(context).textTheme.titleSmall),
-    valueBuilder: (context) => Text(
-      '${(value * 100).round()}%',
-      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.5),
-    ),
-  );
-}
-
-Widget _badgeIcon(IconData icon, Color color) {
-  return Container(
-    width: awesomePieChartDefaultBadgeDiameter,
-    height: awesomePieChartDefaultBadgeDiameter,
-    decoration: BoxDecoration(
-      shape: .circle,
-      color: color,
-      border: Border.all(color: Colors.white, width: 1.5),
-    ),
-    child: Icon(icon, size: 15, color: Colors.white),
-  );
-}
+/// Demo data for the pie chart, sorted largest-first at every level.
+List<ComminglePieSlice> get pieDrillDemoData => buildPieSlices(_financialData);

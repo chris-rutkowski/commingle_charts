@@ -38,6 +38,7 @@ dependencies:
   commingle_charts:
     path: ../
   forui: ^0.23.0
+  big_decimal: ^0.7.0
 
 dev_dependencies:
   flutter_test:

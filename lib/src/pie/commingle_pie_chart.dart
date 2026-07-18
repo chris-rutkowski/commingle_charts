@@ -12,7 +12,6 @@ import 'commingle_pie_slice.dart';
 const awesomePieChartDefaultBadgeDiameter = 28.0;
 const awesomePieChartDefaultRingThickness = 56.0;
 const awesomePieChartDefaultPressedGrowth = 8.0;
-const awesomePieChartDefaultAnimationDuration = Duration(milliseconds: 450);
 
 const _sectionsSpaceDegrees = 2.5;
 const _rootStartOffset = -90.0;
@@ -25,8 +24,9 @@ const _rootStartOffset = -90.0;
 final class ComminglePieChart extends StatefulWidget {
   final List<ComminglePieSlice> slices;
   final ComminglePieChartController? controller;
-  final Duration animationDuration;
-  final Curve animationCurve;
+
+  /// Drives the drill-in / drill-out (level transition) animation.
+  final CommingleChartsAnimation animation;
   final double badgeDiameter;
 
   /// Thickness (in logical pixels) of the painted ring.
@@ -54,8 +54,10 @@ final class ComminglePieChart extends StatefulWidget {
     super.key,
     required this.slices,
     this.controller,
-    this.animationDuration = awesomePieChartDefaultAnimationDuration,
-    this.animationCurve = Curves.easeOutCubic,
+    this.animation = const CommingleChartsAnimation(
+      duration: Duration(milliseconds: 450),
+      curve: Curves.easeOutCubic,
+    ),
     this.badgeDiameter = awesomePieChartDefaultBadgeDiameter,
     this.ringThickness = awesomePieChartDefaultRingThickness,
     this.pressedGrowth = awesomePieChartDefaultPressedGrowth,
@@ -87,7 +89,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
     super.initState();
     _expansion = AnimationController(
       vsync: this,
-      duration: widget.animationDuration,
+      duration: widget.animation.duration,
     )..addStatusListener(_onExpansionStatus);
     widget.controller?.attach(
       reset: _reset,
@@ -157,7 +159,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
       final slices = _currentSlices;
       if (index < 0 || index >= slices.length) return;
 
-      final t = widget.animationCurve.transform(1);
+      final t = widget.animation.curve.transform(1);
       final values = _expandedParentValues(slices, index, t);
       final midpoint = _restingMidpoint(slices, index, startOffset: _currentStartOffset);
       final offset = _offsetKeepingMidpoint(values, index, midpoint);
@@ -199,8 +201,8 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
       );
       _syncControllerPath();
     }
-    if (oldWidget.animationDuration != widget.animationDuration) {
-      _expansion.duration = widget.animationDuration;
+    if (oldWidget.animation.duration != widget.animation.duration) {
+      _expansion.duration = widget.animation.duration;
     }
   }
 
@@ -235,7 +237,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
             builder: (context, _) {
               return _ExpandFrame(
                 slices: _currentSlices,
-                progress: widget.animationCurve.transform(_expansion.value),
+                progress: widget.animation.curve.transform(_expansion.value),
                 selectedIndex: drillIndex,
                 size: size,
                 startOffset: _currentStartOffset,
@@ -253,8 +255,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
           size: size,
           startOffset: _currentStartOffset,
           hotIndex: _hotIndex,
-          animationDuration: widget.animationDuration,
-          animationCurve: widget.animationCurve,
+          animation: widget.animation,
           minIconSweep: minIconSweep,
           fullIconSweep: fullIconSweep,
           badgeDiameter: widget.badgeDiameter,
@@ -667,8 +668,7 @@ final class _RestingPie extends StatelessWidget {
   final double size;
   final double startOffset;
   final int? hotIndex;
-  final Duration animationDuration;
-  final Curve animationCurve;
+  final CommingleChartsAnimation animation;
   final double minIconSweep;
   final double fullIconSweep;
   final double badgeDiameter;
@@ -682,8 +682,7 @@ final class _RestingPie extends StatelessWidget {
     required this.size,
     required this.startOffset,
     required this.hotIndex,
-    required this.animationDuration,
-    required this.animationCurve,
+    required this.animation,
     required this.minIconSweep,
     required this.fullIconSweep,
     required this.badgeDiameter,
@@ -730,7 +729,7 @@ final class _RestingPie extends StatelessWidget {
       dimension: size,
       child: PieChart(
         duration: pressGrowthAnimation?.duration ?? Duration.zero,
-        curve: pressGrowthAnimation?.curve ?? animationCurve,
+        curve: pressGrowthAnimation?.curve ?? animation.curve,
         PieChartData(
           startDegreeOffset: startOffset,
           sectionsSpace: sectionsSpace,

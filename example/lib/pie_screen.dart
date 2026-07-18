@@ -46,8 +46,10 @@ class _PieScreenState extends State<PieScreen> {
                     ComminglePieChart(
                       slices: pieDrillDemoData,
                       controller: _chartController,
-                      animationDuration: const Duration(milliseconds: 450),
-                      animationCurve: Curves.easeInOut,
+                      animation: const CommingleChartsAnimation(
+                        duration: Duration(milliseconds: 450),
+                        curve: Curves.easeInOut,
+                      ),
                       fullIconSweep: 0.4,
                       minIconSweep: 0.2,
                       pressedGrowth: 8.0,
