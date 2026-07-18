@@ -119,6 +119,7 @@ class _PieScreenState extends State<PieScreen> {
     );
   }
 }
+
 class _DemoChartHub extends StatelessWidget {
   final ComminglePieChartController controller;
 

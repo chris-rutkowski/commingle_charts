@@ -58,6 +58,14 @@ final class ComminglePieChart extends StatefulWidget {
   /// renders as a closed ring with no gap.
   final double sliceSpacing;
 
+  /// Whether the user can drive the chart by pressing slices.
+  ///
+  /// When `true` (the default) pressing a slice grows it and drills in. When
+  /// `false` the chart ignores all pointer input — pressing a slice does
+  /// nothing, not even the pressed-growth effect — but the chart can still be
+  /// driven programmatically through its [controller].
+  final bool interactive;
+
   const ComminglePieChart({
     super.key,
     required this.slices,
@@ -72,6 +80,7 @@ final class ComminglePieChart extends StatefulWidget {
     this.fullIconSweep,
     this.minIconSweep,
     this.sliceSpacing = 2.5,
+    this.interactive = true,
   });
 
   @override
@@ -351,6 +360,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
           pressedGrowth: widget.pressedGrowth,
           sliceSpacing: widget.sliceSpacing,
           pressGrowthAnimation: widget.pressGrowthAnimation,
+          interactive: widget.interactive,
           onTouch: _handleTouch,
         );
       },
@@ -783,6 +793,7 @@ final class _RestingPie extends StatelessWidget {
   final double pressedGrowth;
   final double sliceSpacing;
   final CommingleChartsAnimation? pressGrowthAnimation;
+  final bool interactive;
   final void Function(FlTouchEvent, PieTouchResponse?) onTouch;
 
   const _RestingPie({
@@ -797,6 +808,7 @@ final class _RestingPie extends StatelessWidget {
     required this.pressedGrowth,
     required this.sliceSpacing,
     required this.pressGrowthAnimation,
+    required this.interactive,
     required this.onTouch,
   });
 
@@ -842,8 +854,8 @@ final class _RestingPie extends StatelessWidget {
           sectionsSpace: sectionsSpace,
           centerSpaceRadius: hole,
           pieTouchData: PieTouchData(
-            enabled: true,
-            touchCallback: onTouch,
+            enabled: interactive,
+            touchCallback: interactive ? onTouch : null,
           ),
           sections: [
             for (var i = 0; i < slices.length; i++)
