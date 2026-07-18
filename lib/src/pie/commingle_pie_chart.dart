@@ -9,10 +9,10 @@ import 'commingle_pie_chart_controller.dart';
 import 'commingle_pie_slice.dart';
 
 const awesomePieChartDefaultBadgeDiameter = 28.0;
+const awesomePieChartDefaultRingThickness = 56.0;
+const awesomePieChartDefaultRingPadding = 8.0;
 const awesomePieChartDefaultAnimationDuration = Duration(milliseconds: 450);
 
-const _ringPadding = 8.0;
-const _ringThickness = 56.0;
 const _sectionsSpaceDegrees = 2.5;
 const _rootStartOffset = -90.0;
 
@@ -28,6 +28,12 @@ final class ComminglePieChart extends StatefulWidget {
   final Curve animationCurve;
   final double badgeDiameter;
 
+  /// Thickness (in logical pixels) of the painted ring.
+  final double ringThickness;
+
+  /// Padding (in logical pixels) between the chart bounds and the ring's outer edge.
+  final double ringPadding;
+
   /// Section sweep (radians) at/above which a badge is full size (angle₂).
   final double? fullIconSweep;
 
@@ -41,6 +47,8 @@ final class ComminglePieChart extends StatefulWidget {
     this.animationDuration = awesomePieChartDefaultAnimationDuration,
     this.animationCurve = Curves.easeOutCubic,
     this.badgeDiameter = awesomePieChartDefaultBadgeDiameter,
+    this.ringThickness = awesomePieChartDefaultRingThickness,
+    this.ringPadding = awesomePieChartDefaultRingPadding,
     this.fullIconSweep,
     this.minIconSweep,
   });
@@ -175,11 +183,6 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
     if (oldWidget.animationDuration != widget.animationDuration) {
       _expansion.duration = widget.animationDuration;
     }
-
-    print('widget updated');
-    for (final slice in widget.slices) {
-      print('slice ${slice.value}');
-    }
   }
 
   @override
@@ -203,6 +206,8 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
             awesomePieChartFullIconSweep(
               size: size,
               badgeDiameter: widget.badgeDiameter,
+              ringPadding: widget.ringPadding,
+              ringThickness: widget.ringThickness,
             );
         final minIconSweep = widget.minIconSweep ?? fullIconSweep / 2;
 
@@ -218,6 +223,9 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
                 startOffset: _currentStartOffset,
                 minIconSweep: minIconSweep,
                 fullIconSweep: fullIconSweep,
+                badgeDiameter: widget.badgeDiameter,
+                ringThickness: widget.ringThickness,
+                ringPadding: widget.ringPadding,
               );
             },
           );
@@ -232,6 +240,9 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
           animationCurve: widget.animationCurve,
           minIconSweep: minIconSweep,
           fullIconSweep: fullIconSweep,
+          badgeDiameter: widget.badgeDiameter,
+          ringThickness: widget.ringThickness,
+          ringPadding: widget.ringPadding,
           onTouch: _handleTouch,
         );
       },
@@ -328,6 +339,9 @@ final class _ExpandFrame extends StatelessWidget {
   final double startOffset;
   final double minIconSweep;
   final double fullIconSweep;
+  final double badgeDiameter;
+  final double ringThickness;
+  final double ringPadding;
 
   const _ExpandFrame({
     required this.slices,
@@ -337,6 +351,9 @@ final class _ExpandFrame extends StatelessWidget {
     required this.startOffset,
     required this.minIconSweep,
     required this.fullIconSweep,
+    required this.badgeDiameter,
+    required this.ringThickness,
+    required this.ringPadding,
   });
 
   @override
@@ -367,6 +384,9 @@ final class _ExpandFrame extends StatelessWidget {
         size: size,
         color: selected.color,
         midDegree: fixedMidpoint,
+        ringThickness: ringThickness,
+        ringPadding: ringPadding,
+        badgeDiameter: badgeDiameter,
         badge: _badgeForSweep(
           context: context,
           section: selected,
@@ -381,6 +401,8 @@ final class _ExpandFrame extends StatelessWidget {
       context: context,
       size: size,
       offset: offset,
+      ringThickness: ringThickness,
+      ringPadding: ringPadding,
       sectionsSpace: sectionsSpace,
       withBackground: !showChildren,
       slices: [
@@ -416,6 +438,8 @@ final class _ExpandFrame extends StatelessWidget {
                 context: context,
                 size: size,
                 offset: offset,
+                ringThickness: ringThickness,
+                ringPadding: ringPadding,
                 sectionsSpace: selected.slices.length > 1 ? _sectionsSpaceDegrees : 0,
                 slices: _childOverlaySlices(
                   parentSlices: slices,
@@ -438,19 +462,25 @@ final class _ClosedRing extends StatelessWidget {
   final double size;
   final Color color;
   final double midDegree;
+  final double ringThickness;
+  final double ringPadding;
+  final double badgeDiameter;
   final Widget? badge;
 
   const _ClosedRing({
     required this.size,
     required this.color,
     required this.midDegree,
+    required this.ringThickness,
+    required this.ringPadding,
+    required this.badgeDiameter,
     required this.badge,
   });
 
   @override
   Widget build(BuildContext context) {
-    final hole = size / 2 - _ringPadding - _ringThickness;
-    final midRadius = hole + _ringThickness / 2;
+    final hole = size / 2 - ringPadding - ringThickness;
+    final midRadius = hole + ringThickness / 2;
     final midRadians = midDegree * math.pi / 180;
     final badgeOffset = Offset(
       size / 2 + midRadius * math.cos(midRadians),
@@ -468,13 +498,13 @@ final class _ClosedRing extends StatelessWidget {
               painter: _ClosedRingPainter(
                 color: color,
                 holeRadius: hole,
-                thickness: _ringThickness,
+                thickness: ringThickness,
               ),
             ),
             if (badge != null)
               Positioned(
-                left: badgeOffset.dx - awesomePieChartDefaultBadgeDiameter / 2,
-                top: badgeOffset.dy - awesomePieChartDefaultBadgeDiameter / 2,
+                left: badgeOffset.dx - badgeDiameter / 2,
+                top: badgeOffset.dy - badgeDiameter / 2,
                 child: badge!,
               ),
           ],
@@ -536,10 +566,12 @@ Widget _buildRingPie({
   required List<_RingSlice> slices,
   required double minIconSweep,
   required double fullIconSweep,
+  required double ringThickness,
+  required double ringPadding,
   double sectionsSpace = _sectionsSpaceDegrees,
   bool withBackground = false,
 }) {
-  final hole = size / 2 - _ringPadding - _ringThickness;
+  final hole = size / 2 - ringPadding - ringThickness;
 
   final chart = SizedBox.square(
     dimension: size,
@@ -555,7 +587,7 @@ Widget _buildRingPie({
             PieChartSectionData(
               value: slice.value,
               color: slice.color,
-              radius: _ringThickness,
+              radius: ringThickness,
               showTitle: false,
               badgeWidget: slice.showBadge && slice.section != null
                   ? _badgeForSweep(
@@ -652,6 +684,9 @@ final class _RestingPie extends StatelessWidget {
   final Curve animationCurve;
   final double minIconSweep;
   final double fullIconSweep;
+  final double badgeDiameter;
+  final double ringThickness;
+  final double ringPadding;
   final void Function(FlTouchEvent, PieTouchResponse?) onTouch;
 
   const _RestingPie({
@@ -663,6 +698,9 @@ final class _RestingPie extends StatelessWidget {
     required this.animationCurve,
     required this.minIconSweep,
     required this.fullIconSweep,
+    required this.badgeDiameter,
+    required this.ringThickness,
+    required this.ringPadding,
     required this.onTouch,
   });
 
@@ -675,7 +713,7 @@ final class _RestingPie extends StatelessWidget {
       );
     }
 
-    final hole = size / 2 - _ringPadding - _ringThickness;
+    final hole = size / 2 - ringPadding - ringThickness;
     final total = slices.fold<double>(0, (sum, section) => sum + section.value);
     final sweeps = [
       for (final section in slices) section.value / total * 2 * math.pi,
@@ -690,6 +728,9 @@ final class _RestingPie extends StatelessWidget {
         size: size,
         color: section.color,
         midDegree: mid,
+        ringThickness: ringThickness,
+        ringPadding: ringPadding,
+        badgeDiameter: badgeDiameter,
         badge: _badgeForSweep(
           context: context,
           section: section,
@@ -718,7 +759,7 @@ final class _RestingPie extends StatelessWidget {
               PieChartSectionData(
                 value: slices[i].value,
                 color: slices[i].color,
-                radius: hotIndex == i ? _ringThickness + 8 : _ringThickness,
+                radius: hotIndex == i ? ringThickness + 8 : ringThickness,
                 showTitle: false,
                 badgeWidget: _badgeForSweep(
                   context: context,
@@ -740,8 +781,8 @@ final class _RestingPie extends StatelessWidget {
 double awesomePieChartFullIconSweep({
   double size = 320,
   double badgeDiameter = awesomePieChartDefaultBadgeDiameter,
-  double ringPadding = _ringPadding,
-  double ringThickness = _ringThickness,
+  double ringPadding = awesomePieChartDefaultRingPadding,
+  double ringThickness = awesomePieChartDefaultRingThickness,
 }) {
   final midRadius = size / 2 - ringPadding - ringThickness / 2;
   return 2 * math.asin((badgeDiameter / 2) / midRadius);
@@ -751,8 +792,8 @@ double awesomePieChartFullIconSweep({
 double awesomePieChartMinIconSweep({
   double size = 320,
   double badgeDiameter = awesomePieChartDefaultBadgeDiameter,
-  double ringPadding = _ringPadding,
-  double ringThickness = _ringThickness,
+  double ringPadding = awesomePieChartDefaultRingPadding,
+  double ringThickness = awesomePieChartDefaultRingThickness,
 }) =>
     awesomePieChartFullIconSweep(
       size: size,

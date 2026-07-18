@@ -37,3 +37,25 @@ const like = 'sample';
 TODO: Tell users more about the package: where to find more information, how to
 contribute to the package, how to file issues, what response they can expect
 from the package authors, and more.
+
+## Golden (snapshot) tests
+
+Golden tests rasterize differently on macOS vs the Linux CI runner, so goldens
+are generated and verified inside a pinned Linux Flutter image
+(`ghcr.io/adrianjagielak/flutter:3.44.2`, matching [flutter-version.txt](flutter-version.txt)).
+CI runs inside that same image, and locally you use the same image via Docker
+(forced to `linux/amd64`) so the pixels match byte-for-byte.
+
+Requires Docker (Docker Desktop or Colima). From the repo root:
+
+```bash
+# Verify goldens the same way CI does
+scripts/containerised_test.sh
+
+# Regenerate goldens after an intentional visual change, then commit them
+scripts/containerised_test.sh --update-goldens
+```
+
+On failure, CI uploads the diff images (`*_masterImage.png`, `*_testImage.png`,
+`*_isolatedDiff.png`, `*_maskedDiff.png`) as a `golden-failures` artifact on the
+workflow run.

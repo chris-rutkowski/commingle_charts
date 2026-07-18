@@ -9,20 +9,29 @@ on:
 jobs:
   all-tests:
     runs-on: ubuntu-latest
+    # Run inside the exact same Flutter image used locally to generate goldens
+    # (see scripts/containerised_test.sh), so golden rasterization matches
+    # byte-for-byte.
+    # Pinned by digest so the tag can never drift under us.
+    container:
+      image: ghcr.io/adrianjagielak/flutter:3.44.2@sha256:8e2fb6903d05fb8c7fdd5c218f7d7953e74315b1f918355310ac2017738f9e23
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Read Flutter version
-        id: flutter_version
-        run: echo "version=$(cat flutter-version.txt)" >> $GITHUB_OUTPUT
+      - name: Configure git safe directory
+        run: git config --global --add safe.directory '*'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          cache: true
-          flutter-version: ${{ steps.flutter_version.outputs.version }}
+      - name: Verify Flutter version matches flutter-version.txt
+        run: |
+          expected="$(cat flutter-version.txt)"
+          actual="$(flutter --version | head -n1 | awk '{print $2}')"
+          echo "expected=${expected} actual=${actual}"
+          if [ "${expected}" != "${actual}" ]; then
+            echo "::error::Image Flutter ${actual} does not match flutter-version.txt (${expected})"
+            exit 1
+          fi
 
       - name: Flutter pub get
         run: flutter pub get

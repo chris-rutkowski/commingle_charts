@@ -18,7 +18,12 @@ const _animationDuration = Duration(milliseconds: 450);
 /// frame lands exactly on the settled resting state.
 const _frameCount = 30;
 
-const _chartSize = 320.0;
+// Half the production 320px chart so goldens are 160x160 (~1/4 the storage).
+// Ring/badge/icon are scaled by the same 0.5 factor to stay proportional.
+const _chartSize = 160.0;
+const _badgeDiameter = 14.0;
+const _ringThickness = 28.0;
+const _ringPadding = 4.0;
 
 // Drill indices into [_journeyData].
 const _homeIndex = 1;
@@ -238,6 +243,9 @@ final class _ChartHost extends StatelessWidget {
             child: ComminglePieChart(
               slices: slices,
               controller: controller,
+              badgeDiameter: _badgeDiameter,
+              ringThickness: _ringThickness,
+              ringPadding: _ringPadding,
               fullIconSweep: 0.4,
               minIconSweep: 0.2,
             ),
@@ -304,13 +312,13 @@ ComminglePieSlice _section({
 
 Widget _badgeIcon(IconData icon, Color color) {
   return Container(
-    width: awesomePieChartDefaultBadgeDiameter,
-    height: awesomePieChartDefaultBadgeDiameter,
+    width: _badgeDiameter,
+    height: _badgeDiameter,
     decoration: BoxDecoration(
       shape: BoxShape.circle,
       color: color,
-      border: Border.all(color: Colors.white, width: 1.5),
+      border: Border.all(color: Colors.white, width: 0.75),
     ),
-    child: Icon(icon, size: 15, color: Colors.white),
+    child: Icon(icon, size: 7.5, color: Colors.white),
   );
 }
