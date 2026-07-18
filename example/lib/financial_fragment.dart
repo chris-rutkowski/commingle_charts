@@ -18,7 +18,7 @@ final class FinancialFragment {
   final IconData icon;
 
   /// Child fragments; empty means a leaf.
-  final List<FinancialFragment> subfragments;
+  final List<FinancialFragment> children;
 
   const FinancialFragment({
     required this.id,
@@ -26,7 +26,7 @@ final class FinancialFragment {
     required this.title,
     required this.color,
     required this.icon,
-    this.subfragments = const [],
+    this.children = const [],
   });
 }
 
@@ -45,7 +45,7 @@ List<ComminglePieSlice> buildPieSlices(List<FinancialFragment> fragments) {
             ? 0
             : fragment.value.divide(total, roundingMode: RoundingMode.HALF_UP, scale: 12).toDouble(),
         color: fragment.color,
-        slices: buildPieSlices(fragment.subfragments),
+        slices: buildPieSlices(fragment.children),
         iconBuilder: (context) => _badgeIcon(fragment.icon, fragment.color),
         titleBuilder: (context) =>
             Text(fragment.title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleSmall),

@@ -12,14 +12,14 @@ final _financialData = <FinancialFragment>[
     title: 'Food',
     color: const Color(0xFFE53935),
     icon: Icons.restaurant_rounded,
-    subfragments: [
+    children: [
       FinancialFragment(
         id: 'id_restaurant',
         value: BigDecimal.parse('273'),
         title: 'Restaurant',
         color: const Color(0xFFB71C1C),
         icon: Icons.delivery_dining_rounded,
-        subfragments: [
+        children: [
           FinancialFragment(
             id: 'id_mcdonalds',
             value: BigDecimal.parse('163.80'),
