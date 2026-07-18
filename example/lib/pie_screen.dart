@@ -2,6 +2,7 @@ import 'package:commingle_charts/commingle_charts.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 
+import 'financial_fragment.dart';
 import 'pie_drill_demo_data.dart';
 
 class PieScreen extends StatefulWidget {
@@ -58,14 +59,7 @@ class _PieScreenState extends State<PieScreen> {
                         curve: Curves.easeOut,
                       ),
                     ),
-                    ListenableBuilder(
-                      listenable: _chartController,
-                      builder: (context, _) {
-                        return _DemoChartHub(
-                          onReset: _chartController.path.isNotEmpty ? _chartController.collapse : null,
-                        );
-                      },
-                    ),
+                    _DemoChartHub(controller: _chartController),
                   ],
                 ),
               ),
@@ -124,34 +118,32 @@ ComminglePieSlice? _findSliceByKey(List<ComminglePieSlice> slices, Object key) {
 }
 
 class _DemoChartHub extends StatelessWidget {
-  final VoidCallback? onReset;
+  final ComminglePieChartController controller;
 
-  const _DemoChartHub({required this.onReset});
+  const _DemoChartHub({required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('July spending', textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 4),
-          Text(
-            '100%',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.5),
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) {
+        final fragment = financialFragmentForPath(controller.path);
+        return Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(fragment.title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 4),
+              Text(
+                formatCurrency(fragment.value),
+                style: Theme.of(
+                  context,
+                ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.5),
+              ),
+            ],
           ),
-          if (onReset != null) ...[
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: onReset,
-              style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
-              child: const Text('← Reset'),
-            ),
-          ],
-        ],
-      ),
+        );
+      },
     );
   }
 }

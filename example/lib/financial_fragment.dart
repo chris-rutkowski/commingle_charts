@@ -51,14 +51,15 @@ List<ComminglePieSlice> buildPieSlices(List<FinancialFragment> fragments) {
         titleBuilder: (context) =>
             Text(fragment.title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleSmall),
         valueBuilder: (context) => Text(
-          _formatCurrency(fragment.value),
+          formatCurrency(fragment.value),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.5),
         ),
       ),
   ];
 }
 
-String _formatCurrency(BigDecimal value) {
+/// Formats an absolute [value] as a currency string (e.g. `$163.80`).
+String formatCurrency(BigDecimal value) {
   return '\$${value.withScale(2, roundingMode: RoundingMode.HALF_UP).toPlainString()}';
 }
 

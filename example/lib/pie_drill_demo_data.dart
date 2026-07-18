@@ -96,5 +96,27 @@ final _financialData = <FinancialFragment>[
   ),
 ];
 
+/// Synthetic top-most node: the whole chart aggregated as "July spending".
+final _root = FinancialFragment(
+  id: 'id_root',
+  value: _financialData.fold(BigDecimal.zero, (sum, f) => sum + f.value),
+  title: 'July spending',
+  color: const Color(0xFF212121),
+  icon: Icons.pie_chart_rounded,
+  children: _financialData,
+);
+
 /// Demo data for the pie chart, sorted largest-first at every level.
 List<ComminglePieSlice> get pieDrillDemoData => buildPieSlices(_financialData);
+
+/// Resolves the drill [path] to a [FinancialFragment].
+///
+/// An empty path returns the top-most node ([_root]); otherwise it walks the
+/// children by key, one level per entry.
+FinancialFragment financialFragmentForPath(List<ComminglePieSliceKey> path) {
+  var node = _root;
+  for (final key in path) {
+    node = node.children.firstWhere((child) => child.id == key, orElse: () => node);
+  }
+  return node;
+}
