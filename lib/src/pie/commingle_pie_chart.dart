@@ -11,7 +11,6 @@ import 'commingle_pie_slice.dart';
 
 const awesomePieChartDefaultBadgeDiameter = 28.0;
 const awesomePieChartDefaultRingThickness = 56.0;
-const awesomePieChartDefaultPressedGrowth = 8.0;
 
 const _sectionsSpaceDegrees = 2.5;
 const _rootStartOffset = -90.0;
@@ -60,7 +59,7 @@ final class ComminglePieChart extends StatefulWidget {
     ),
     this.badgeDiameter = awesomePieChartDefaultBadgeDiameter,
     this.ringThickness = awesomePieChartDefaultRingThickness,
-    this.pressedGrowth = awesomePieChartDefaultPressedGrowth,
+    this.pressedGrowth = 8.0,
     this.pressGrowthAnimation,
     this.fullIconSweep,
     this.minIconSweep,
