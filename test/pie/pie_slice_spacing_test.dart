@@ -133,8 +133,8 @@ ComminglePieSlice _section({required int index, required int count}) {
 
 Widget _badgeIcon(Color color) {
   return Container(
-    width: awesomePieChartDefaultBadgeDiameter,
-    height: awesomePieChartDefaultBadgeDiameter,
+    width: 28.0,
+    height: 28.0,
     decoration: BoxDecoration(
       shape: BoxShape.circle,
       color: color,

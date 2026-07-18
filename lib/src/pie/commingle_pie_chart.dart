@@ -9,8 +9,6 @@ import '../commingle_charts_animation.dart';
 import 'commingle_pie_chart_controller.dart';
 import 'commingle_pie_slice.dart';
 
-const awesomePieChartDefaultBadgeDiameter = 28.0;
-
 const _rootStartOffset = -90.0;
 
 /// Interactive multi-level pie chart.
@@ -24,7 +22,6 @@ final class ComminglePieChart extends StatefulWidget {
 
   /// Drives the drill-in / drill-out (level transition) animation.
   final CommingleChartsAnimation animation;
-  final double badgeDiameter;
 
   /// Thickness (in logical pixels) of the painted ring.
   final double ringThickness;
@@ -41,10 +38,18 @@ final class ComminglePieChart extends StatefulWidget {
   /// grow/shrink.
   final CommingleChartsAnimation? pressGrowthAnimation;
 
-  /// Section sweep (radians) at/above which a badge is full size (angle₂).
+  /// Section sweep (radians) at/above which a badge is drawn full size (angle₂).
+  ///
+  /// The badge's full size is whatever the slice's `iconBuilder` returns; this
+  /// only controls when it is shrunk. Leave null to always draw icons at full
+  /// size regardless of sweep.
   final double? fullIconSweep;
 
-  /// Section sweep (radians) at which a badge is half size (angle₁).
+  /// Section sweep (radians) at which a badge is half size (angle₁); below this
+  /// the badge is omitted.
+  ///
+  /// Defaults to [fullIconSweep] / 2 when a [fullIconSweep] is supplied, or to
+  /// no lower bound when neither is set.
   final double? minIconSweep;
 
   /// Gap between adjacent slices, in logical pixels.
@@ -61,7 +66,6 @@ final class ComminglePieChart extends StatefulWidget {
       duration: Duration(milliseconds: 450),
       curve: Curves.easeOutCubic,
     ),
-    this.badgeDiameter = awesomePieChartDefaultBadgeDiameter,
     this.ringThickness = 56.0,
     this.pressedGrowth = 8.0,
     this.pressGrowthAnimation,
@@ -310,13 +314,10 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = math.min(constraints.maxWidth, constraints.maxHeight);
-        final fullIconSweep =
-            widget.fullIconSweep ??
-            awesomePieChartFullIconSweep(
-              size: size,
-              badgeDiameter: widget.badgeDiameter,
-              ringThickness: widget.ringThickness,
-            );
+        // No thresholds supplied: render each icon exactly as its builder
+        // returns it (full size, never hidden). Callers opt into responsive
+        // sizing by supplying [fullIconSweep] / [minIconSweep] in radians.
+        final fullIconSweep = widget.fullIconSweep ?? 0.0;
         final minIconSweep = widget.minIconSweep ?? fullIconSweep / 2;
 
         if (_drillIndex case final drillIndex?) {
@@ -331,7 +332,6 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
                 startOffset: _currentStartOffset,
                 minIconSweep: minIconSweep,
                 fullIconSweep: fullIconSweep,
-                badgeDiameter: widget.badgeDiameter,
                 ringThickness: widget.ringThickness,
                 sliceSpacing: widget.sliceSpacing,
               );
@@ -347,7 +347,6 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
           animation: widget.animation,
           minIconSweep: minIconSweep,
           fullIconSweep: fullIconSweep,
-          badgeDiameter: widget.badgeDiameter,
           ringThickness: widget.ringThickness,
           pressedGrowth: widget.pressedGrowth,
           sliceSpacing: widget.sliceSpacing,
@@ -457,7 +456,6 @@ final class _ExpandFrame extends StatelessWidget {
   final double startOffset;
   final double minIconSweep;
   final double fullIconSweep;
-  final double badgeDiameter;
   final double ringThickness;
   final double sliceSpacing;
 
@@ -469,7 +467,6 @@ final class _ExpandFrame extends StatelessWidget {
     required this.startOffset,
     required this.minIconSweep,
     required this.fullIconSweep,
-    required this.badgeDiameter,
     required this.ringThickness,
     required this.sliceSpacing,
   });
@@ -500,7 +497,6 @@ final class _ExpandFrame extends StatelessWidget {
         color: selected.color,
         midDegree: fixedMidpoint,
         ringThickness: ringThickness,
-        badgeDiameter: badgeDiameter,
         badge: _badgeForSweep(
           context: context,
           section: selected,
@@ -571,7 +567,6 @@ final class _ClosedRing extends StatelessWidget {
   final Color color;
   final double midDegree;
   final double ringThickness;
-  final double badgeDiameter;
   final Widget? badge;
 
   const _ClosedRing({
@@ -579,7 +574,6 @@ final class _ClosedRing extends StatelessWidget {
     required this.color,
     required this.midDegree,
     required this.ringThickness,
-    required this.badgeDiameter,
     required this.badge,
   });
 
@@ -606,10 +600,16 @@ final class _ClosedRing extends StatelessWidget {
             ),
           ),
           if (badge != null)
+            // Anchor the badge's top-left at the mid-arc point, then shift it
+            // back by half its own measured size so its centre lands there —
+            // no assumed diameter needed.
             Positioned(
-              left: badgeOffset.dx - badgeDiameter / 2,
-              top: badgeOffset.dy - badgeDiameter / 2,
-              child: badge!,
+              left: badgeOffset.dx,
+              top: badgeOffset.dy,
+              child: FractionalTranslation(
+                translation: const Offset(-0.5, -0.5),
+                child: badge!,
+              ),
             ),
         ],
       ),
@@ -779,7 +779,6 @@ final class _RestingPie extends StatelessWidget {
   final CommingleChartsAnimation animation;
   final double minIconSweep;
   final double fullIconSweep;
-  final double badgeDiameter;
   final double ringThickness;
   final double pressedGrowth;
   final double sliceSpacing;
@@ -794,7 +793,6 @@ final class _RestingPie extends StatelessWidget {
     required this.animation,
     required this.minIconSweep,
     required this.fullIconSweep,
-    required this.badgeDiameter,
     required this.ringThickness,
     required this.pressedGrowth,
     required this.sliceSpacing,
@@ -824,7 +822,6 @@ final class _RestingPie extends StatelessWidget {
         color: section.color,
         midDegree: mid,
         ringThickness: ringThickness,
-        badgeDiameter: badgeDiameter,
         badge: _badgeForSweep(
           context: context,
           section: section,
@@ -870,29 +867,6 @@ final class _RestingPie extends StatelessWidget {
     );
   }
 }
-
-/// Sweep where a badge of [badgeDiameter] fits the ring’s mid-arc.
-double awesomePieChartFullIconSweep({
-  double size = 320,
-  double badgeDiameter = awesomePieChartDefaultBadgeDiameter,
-  double ringThickness = 56.0,
-}) {
-  final midRadius = size / 2 - ringThickness / 2;
-  return 2 * math.asin((badgeDiameter / 2) / midRadius);
-}
-
-/// Sweep at which the badge is half size; below this it is omitted.
-double awesomePieChartMinIconSweep({
-  double size = 320,
-  double badgeDiameter = awesomePieChartDefaultBadgeDiameter,
-  double ringThickness = 56.0,
-}) =>
-    awesomePieChartFullIconSweep(
-      size: size,
-      badgeDiameter: badgeDiameter,
-      ringThickness: ringThickness,
-    ) /
-    2;
 
 Widget? _badgeForSweep({
   required BuildContext context,

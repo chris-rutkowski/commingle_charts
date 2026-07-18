@@ -283,7 +283,6 @@ final class _ChartHost extends StatelessWidget {
             child: ComminglePieChart(
               slices: slices,
               controller: controller,
-              badgeDiameter: _badgeDiameter,
               ringThickness: _ringThickness,
               fullIconSweep: 0.4,
               minIconSweep: 0.2,
