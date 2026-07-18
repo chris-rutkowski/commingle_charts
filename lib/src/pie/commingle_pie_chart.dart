@@ -99,6 +99,14 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
 
   bool get _isBusy => _drillIndex != null || _expansion.isAnimating;
 
+  /// Finish any in-flight transition immediately, committing its end state.
+  void _settle() {
+    if (_drillIndex == null) return;
+    // Fires _onExpansionStatus synchronously: completed -> commit new level,
+    // dismissed -> drop the collapse overlay.
+    _expansion.value = _drillForward ? 1.0 : 0.0;
+  }
+
   List<ComminglePieSlice> get _currentSlices => _slicesAtPath(_path);
 
   double get _currentStartOffset => _offsetStack.last;
@@ -286,7 +294,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
   }
 
   void _expand(int index) {
-    if (_isBusy) return;
+    if (_isBusy) _settle();
     final slices = _currentSlices;
     if (index < 0 || index >= slices.length) return;
     unawaited(HapticFeedback.mediumImpact());
@@ -300,14 +308,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
   }
 
   void _collapse() {
-    if (_drillIndex != null) {
-      if (_expansion.value <= 0) return;
-      unawaited(HapticFeedback.selectionClick());
-      _drillForward = false;
-      _syncControllerPath();
-      _expansion.reverse();
-      return;
-    }
+    if (_isBusy) _settle();
     if (_path.isEmpty) return;
     unawaited(HapticFeedback.selectionClick());
     final index = _path.removeLast();
