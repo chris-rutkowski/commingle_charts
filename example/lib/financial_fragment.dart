@@ -34,17 +34,19 @@ final class FinancialFragment {
 ///
 /// [ComminglePieSlice.value] is a share of its parent, so each fragment's
 /// amount is divided by the sum of its level (which equals its parent amount).
+///
+/// Only fragments with a positive amount are mapped; zero (or negative) amounts
+/// are omitted, since [ComminglePieSlice.value] must be `> 0`.
 List<ComminglePieSlice> buildPieSlices(List<FinancialFragment> fragments) {
-  final total = fragments.fold(BigDecimal.zero, (sum, f) => sum + f.value);
-  final sorted = [...fragments]..sort((a, b) => b.value.compareTo(a.value));
+  final positive = [for (final f in fragments) if (f.value.compareTo(BigDecimal.zero) > 0) f];
+  final total = positive.fold(BigDecimal.zero, (sum, f) => sum + f.value);
+  final sorted = [...positive]..sort((a, b) => b.value.compareTo(a.value));
 
   return [
     for (final fragment in sorted)
       ComminglePieSlice(
         key: fragment.id,
-        value: total == BigDecimal.zero
-            ? 0
-            : fragment.value.divide(total, roundingMode: RoundingMode.HALF_UP, scale: 12).toDouble(),
+        value: fragment.value.divide(total, roundingMode: RoundingMode.HALF_UP, scale: 12).toDouble(),
         color: fragment.color,
         slices: buildPieSlices(fragment.children),
         iconBuilder: (context) => _badgeIcon(fragment.icon, fragment.color),

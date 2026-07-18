@@ -94,6 +94,15 @@ final _financialData = <FinancialFragment>[
     color: const Color(0xFF00ACC1),
     icon: Icons.subscriptions_rounded,
   ),
+  // Redundant zero-amount category: proves buildPieSlices omits non-positive
+  // fragments (this never appears as a slice).
+  FinancialFragment(
+    id: 'id_savings',
+    value: BigDecimal.zero,
+    title: 'Savings',
+    color: const Color(0xFF6D4C41),
+    icon: Icons.savings_rounded,
+  ),
 ];
 
 /// Synthetic top-most node: the whole chart aggregated as "July spending".

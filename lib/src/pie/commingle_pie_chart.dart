@@ -12,7 +12,6 @@ import 'commingle_pie_slice.dart';
 const awesomePieChartDefaultBadgeDiameter = 28.0;
 const awesomePieChartDefaultRingThickness = 56.0;
 
-const _sectionsSpaceDegrees = 2.5;
 const _rootStartOffset = -90.0;
 
 /// Interactive multi-level pie chart.
@@ -49,6 +48,12 @@ final class ComminglePieChart extends StatefulWidget {
   /// Section sweep (radians) at which a badge is half size (angle₁).
   final double? minIconSweep;
 
+  /// Gap between adjacent slices, in logical pixels.
+  ///
+  /// Only relevant when a level has more than one slice; a single-slice level
+  /// renders as a closed ring with no gap.
+  final double sliceSpacing;
+
   const ComminglePieChart({
     super.key,
     required this.slices,
@@ -63,6 +68,7 @@ final class ComminglePieChart extends StatefulWidget {
     this.pressGrowthAnimation,
     this.fullIconSweep,
     this.minIconSweep,
+    this.sliceSpacing = 2.5,
   });
 
   @override
@@ -328,6 +334,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
                 fullIconSweep: fullIconSweep,
                 badgeDiameter: widget.badgeDiameter,
                 ringThickness: widget.ringThickness,
+                sliceSpacing: widget.sliceSpacing,
               );
             },
           );
@@ -344,6 +351,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
           badgeDiameter: widget.badgeDiameter,
           ringThickness: widget.ringThickness,
           pressedGrowth: widget.pressedGrowth,
+          sliceSpacing: widget.sliceSpacing,
           pressGrowthAnimation: widget.pressGrowthAnimation,
           onTouch: _handleTouch,
         );
@@ -452,6 +460,7 @@ final class _ExpandFrame extends StatelessWidget {
   final double fullIconSweep;
   final double badgeDiameter;
   final double ringThickness;
+  final double sliceSpacing;
 
   const _ExpandFrame({
     required this.slices,
@@ -463,6 +472,7 @@ final class _ExpandFrame extends StatelessWidget {
     required this.fullIconSweep,
     required this.badgeDiameter,
     required this.ringThickness,
+    required this.sliceSpacing,
   });
 
   @override
@@ -483,7 +493,7 @@ final class _ExpandFrame extends StatelessWidget {
     // incoming overlay. Leaves stay opaque and become a closed ring.
     final selectedOpacity = showChildren ? (t <= 0.5 ? 1.0 : 2 * (1 - t)) : 1.0;
 
-    final sectionsSpace = _sectionsSpaceDegrees * (1 - t);
+    final sectionsSpace = sliceSpacing * (1 - t);
 
     if (!showChildren && t >= 1) {
       return _ClosedRing(
@@ -540,7 +550,7 @@ final class _ExpandFrame extends StatelessWidget {
               size: size,
               offset: offset,
               ringThickness: ringThickness,
-              sectionsSpace: selected.slices.length > 1 ? _sectionsSpaceDegrees : 0,
+              sectionsSpace: selected.slices.length > 1 ? sliceSpacing : 0,
               slices: _childOverlaySlices(
                 parentSlices: slices,
                 selectedIndex: selectedIndex,
@@ -661,7 +671,7 @@ Widget _buildRingPie({
   required double minIconSweep,
   required double fullIconSweep,
   required double ringThickness,
-  double sectionsSpace = _sectionsSpaceDegrees,
+  required double sectionsSpace,
 }) {
   final hole = size / 2 - ringThickness;
 
@@ -773,6 +783,7 @@ final class _RestingPie extends StatelessWidget {
   final double badgeDiameter;
   final double ringThickness;
   final double pressedGrowth;
+  final double sliceSpacing;
   final CommingleChartsAnimation? pressGrowthAnimation;
   final void Function(FlTouchEvent, PieTouchResponse?) onTouch;
 
@@ -787,6 +798,7 @@ final class _RestingPie extends StatelessWidget {
     required this.badgeDiameter,
     required this.ringThickness,
     required this.pressedGrowth,
+    required this.sliceSpacing,
     required this.pressGrowthAnimation,
     required this.onTouch,
   });
@@ -802,7 +814,7 @@ final class _RestingPie extends StatelessWidget {
     final sweeps = [
       for (final section in slices) section.value / total * 2 * math.pi,
     ];
-    final sectionsSpace = slices.length > 1 ? _sectionsSpaceDegrees : 0.0;
+    final sectionsSpace = slices.length > 1 ? sliceSpacing : 0.0;
 
     // Single leaf section: closed ring avoids fl_chart's near-360 seam.
     if (slices.length == 1) {
