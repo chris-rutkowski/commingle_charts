@@ -51,12 +51,11 @@ jobs:
         run: flutter pub get
 
       - name: Analyze package
-        run: flutter analyze --fatal-infos
+        run: dart analyze --fatal-infos lib test
 
       - name: Example pub get
         run: flutter pub get
         working-directory: example
 
       - name: Analyze example
-        run: flutter analyze --fatal-infos
-        working-directory: example
+        run: dart analyze --fatal-infos example/lib
