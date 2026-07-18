@@ -30,6 +30,15 @@ jobs:
       - name: Flutter unit tests
         run: flutter test --reporter=failures-only
 
+      - name: Upload golden failures
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-failures
+          path: '**/failures/**'
+          if-no-files-found: ignore
+          retention-days: 1
+
       - name: Analyze package
         run: dart analyze --fatal-infos lib test
 
