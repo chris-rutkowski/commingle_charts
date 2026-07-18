@@ -79,12 +79,16 @@ class _PieScreenState extends State<PieScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  FBreadcrumb(
-                    children: [
-                      const FBreadcrumbItem(child: Text('July spending')),
-                      for (final (index, slice) in path.indexed)
-                        FBreadcrumbItem(current: index == path.length - 1, child: slice.titleBuilder(context)),
-                    ],
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: FBreadcrumb(
+                      children: [
+                        const FBreadcrumbItem(child: Text('July spending')),
+                        for (final (index, slice) in path.indexed)
+                          FBreadcrumbItem(current: index == path.length - 1, child: slice.titleBuilder(context)),
+                      ],
+                    ),
                   ),
                   if (path.isNotEmpty) ...[
                     const SizedBox(height: 12),

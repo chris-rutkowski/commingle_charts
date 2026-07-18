@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-typedef AwesomePieChartWidgetBuilder = Widget Function(BuildContext context);
-
 /// One slice. [value] is this slice’s share of its **parent** (0–1).
 /// Nested [slices] are shares of **this** slice, recursively.
 final class ComminglePieSlice {
@@ -12,9 +10,9 @@ final class ComminglePieSlice {
   /// their values updated without kicking the user out of the current level.
   final Object key;
 
-  final AwesomePieChartWidgetBuilder iconBuilder;
-  final AwesomePieChartWidgetBuilder titleBuilder;
-  final AwesomePieChartWidgetBuilder valueBuilder;
+  final WidgetBuilder iconBuilder;
+  final WidgetBuilder titleBuilder;
+  final WidgetBuilder valueBuilder;
 
   /// Share of the parent chart / parent slice (e.g. `0.6` = 60%).
   final double value;
