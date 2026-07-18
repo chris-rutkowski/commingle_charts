@@ -123,11 +123,6 @@ ComminglePieSlice _section({required int index, required int count}) {
     value: 1,
     color: color,
     iconBuilder: (context) => _badgeIcon(color),
-    titleBuilder: (context) => Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleSmall),
-    valueBuilder: (context) => Text(
-      '${(100 / count).round()}%',
-      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.5),
-    ),
   );
 }
 

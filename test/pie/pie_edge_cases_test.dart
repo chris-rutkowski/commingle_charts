@@ -181,11 +181,6 @@ ComminglePieSlice _section({
     value: value,
     color: color,
     iconBuilder: (context) => _badgeIcon(color),
-    titleBuilder: (context) => Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleSmall),
-    valueBuilder: (context) => Text(
-      '${(value * 100).round()}%',
-      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.5),
-    ),
   );
 }
 

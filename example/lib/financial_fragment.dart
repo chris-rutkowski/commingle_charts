@@ -50,12 +50,6 @@ List<ComminglePieSlice> buildPieSlices(List<FinancialFragment> fragments) {
         color: fragment.color,
         slices: buildPieSlices(fragment.children),
         iconBuilder: (context) => _badgeIcon(fragment.icon, fragment.color),
-        titleBuilder: (context) =>
-            Text(fragment.title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleSmall),
-        valueBuilder: (context) => Text(
-          formatCurrency(fragment.value),
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.5),
-        ),
       ),
   ];
 }

@@ -14,8 +14,6 @@ final class ComminglePieSlice {
   final ComminglePieSliceKey key;
 
   final WidgetBuilder iconBuilder;
-  final WidgetBuilder titleBuilder;
-  final WidgetBuilder valueBuilder;
 
   /// Share of the parent chart / parent slice (e.g. `0.6` = 60%).
   ///
@@ -38,8 +36,6 @@ final class ComminglePieSlice {
   const ComminglePieSlice({
     required this.key,
     required this.iconBuilder,
-    required this.titleBuilder,
-    required this.valueBuilder,
     required this.value,
     required this.color,
     this.slices = const [],

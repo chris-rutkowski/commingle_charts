@@ -85,12 +85,15 @@ class _PieScreenState extends State<PieScreen> {
                           child: const Text('July spending'),
                         ),
                         for (final key in path)
-                          if (_findSliceByKey(pieDrillDemoData, key) case final slice?)
-                            FBreadcrumbItem(
-                              current: key == path.last,
-                              onPress: key == path.last ? null : () => _chartController.collapseTo(key),
-                              child: slice.titleBuilder(context),
+                          FBreadcrumbItem(
+                            current: key == path.last,
+                            onPress: key == path.last ? null : () => _chartController.collapseTo(key),
+                            child: Text(
+                              financialFragmentForPath([...path.takeWhile((k) => k != key), key]).title,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
+                          ),
                       ],
                     ),
                   ),
@@ -116,16 +119,6 @@ class _PieScreenState extends State<PieScreen> {
     );
   }
 }
-
-ComminglePieSlice? _findSliceByKey(List<ComminglePieSlice> slices, Object key) {
-  for (final slice in slices) {
-    if (slice.key == key) return slice;
-    final found = _findSliceByKey(slice.slices, key);
-    if (found != null) return found;
-  }
-  return null;
-}
-
 class _DemoChartHub extends StatelessWidget {
   final ComminglePieChartController controller;
 
