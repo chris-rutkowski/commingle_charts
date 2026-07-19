@@ -1,5 +1,6 @@
 import 'package:commingle_charts/commingle_charts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:forui/forui.dart';
 
 import 'financial_fragment.dart';
@@ -19,6 +20,13 @@ class _PieScreenState extends State<PieScreen> {
   void dispose() {
     _chartController.dispose();
     super.dispose();
+  }
+
+  /// The library emits no haptics; the app owns all feedback. Fire a light tap
+  /// then run [action].
+  void _lightTap(VoidCallback action) {
+    HapticFeedback.lightImpact();
+    action();
   }
 
   @override
@@ -59,6 +67,7 @@ class _PieScreenState extends State<PieScreen> {
                         duration: Duration(milliseconds: 150),
                         curve: Curves.easeOut,
                       ),
+                      onSlicePressed: (_) => HapticFeedback.lightImpact(),
                     ),
                     _DemoChartHub(controller: _chartController),
                   ],
@@ -81,13 +90,13 @@ class _PieScreenState extends State<PieScreen> {
                       children: [
                         FBreadcrumbItem(
                           current: path.isEmpty,
-                          onPress: path.isEmpty ? null : _chartController.collapseToRoot,
+                          onPress: path.isEmpty ? null : () => _lightTap(_chartController.collapseToRoot),
                           child: const Text('July spending'),
                         ),
                         for (final key in path)
                           FBreadcrumbItem(
                             current: key == path.last,
-                            onPress: key == path.last ? null : () => _chartController.collapseTo(key),
+                            onPress: key == path.last ? null : () => _lightTap(() => _chartController.collapseTo(key)),
                             child: Text(
                               financialFragmentForPath([...path.takeWhile((k) => k != key), key]).title,
                               textAlign: TextAlign.center,
@@ -105,7 +114,7 @@ class _PieScreenState extends State<PieScreen> {
                       style: FButtonStyleDelta.delta(
                         tappableStyle: FTappableStyleDelta.delta(motion: FTappableMotion.none),
                       ),
-                      onPress: _chartController.collapse,
+                      onPress: () => _lightTap(_chartController.collapse),
                       child: const Text('Back'),
                     ),
                   ],

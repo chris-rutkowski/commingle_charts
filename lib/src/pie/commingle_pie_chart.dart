@@ -64,6 +64,14 @@ final class ComminglePieChart extends StatefulWidget {
   /// driven programmatically through its [controller].
   final bool interactive;
 
+  /// Called when the user taps a slice (the tap that starts a drill-in), with
+  /// that slice's key.
+  ///
+  /// Fires only for direct user taps, not for programmatic
+  /// [ComminglePieChartController.expand] calls. Use it to add your own feedback
+  /// such as haptics.
+  final ValueChanged<ComminglePieSliceKey>? onSlicePressed;
+
   const ComminglePieChart({
     super.key,
     required this.slices,
@@ -79,6 +87,7 @@ final class ComminglePieChart extends StatefulWidget {
     this.minIconSweep,
     this.sliceSpacing = 2.5,
     this.interactive = true,
+    this.onSlicePressed,
   });
 
   @override
@@ -382,6 +391,7 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
         setState(() => _hotIndex = null);
         return;
       }
+      widget.onSlicePressed?.call(slices[index].key);
       _expand(index);
       return;
     }
