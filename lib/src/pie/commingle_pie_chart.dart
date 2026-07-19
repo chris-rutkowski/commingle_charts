@@ -1,9 +1,7 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../commingle_charts_animation.dart';
 import 'commingle_pie_chart_controller.dart';
@@ -408,7 +406,6 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
     if (_isBusy) _settle();
     final slices = _currentSlices;
     if (index < 0 || index >= slices.length) return;
-    unawaited(HapticFeedback.mediumImpact());
     setState(() {
       _drillIndex = index;
       _drillForward = true;
@@ -425,7 +422,6 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
   void _collapseTo(int depth) {
     if (_isBusy) _settle();
     if (depth < 0 || depth >= _path.length) return;
-    unawaited(HapticFeedback.selectionClick());
     final index = _path[depth];
     _path.removeRange(depth, _path.length);
     _offsetStack.removeRange(depth + 1, _offsetStack.length);
@@ -440,7 +436,6 @@ final class _ComminglePieChartState extends State<ComminglePieChart> with Single
   }
 
   void _reset() {
-    unawaited(HapticFeedback.selectionClick());
     _expansion
       ..stop()
       ..value = 0;
